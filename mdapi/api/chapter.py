@@ -50,11 +50,10 @@ class ChapterAPI:
         })
 
     def download(self, chapter, path):
-        # base = self.get_md_at_home_url(chapter)
-        base = "https://reh3tgm2rs8sr.xnvda7fch4zhr.mangadex.network//"
+        base = self.api.md.misc.get_md_at_home_url(chapter)
 
         for i in chapter.data:
-            url = f"{base}data/{chapter.hash}/{i}"
+            url = f"{base}/data/{chapter.hash}/{i}"
             req = requests.get(url, stream=True)
             if req.url != url:
                 click.echo(click.style(

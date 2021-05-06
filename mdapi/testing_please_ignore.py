@@ -1,9 +1,8 @@
-import os
 from devtools import debug
 import click
 
 from .mdapi import MdAPI, MdException
-from .schema_new import EditManga, NewManga
+from .schema_new import NewManga
 from .schema import LocalizedString
 
 

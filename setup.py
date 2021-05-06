@@ -7,7 +7,7 @@ with open("README.md", encoding="utf-8") as file_:
 
 setuptools.setup(
     name="mdex",
-    version="0.0.3",
+    version="0.0.7",
     author="Bottersnike",
     author_email="bottersnike237@gmail.com",
     description="Mangadex CLI",
@@ -25,6 +25,7 @@ setuptools.setup(
     scripts=[
         "scripts/mdex.py"
     ],
-    packages=["mdex"],
+    packages=["mdapi"],
     python_requires=">=3.8",
+    install_requires=open("requirements.txt").read().split("\n")
 )

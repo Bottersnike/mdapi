@@ -1,4 +1,4 @@
 #!/usr/bin/env python3
-from mdex import main
+from mdapi import main
 
 main()

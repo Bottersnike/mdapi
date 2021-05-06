@@ -18,7 +18,8 @@ class APIHandler:
 
     AUTH_FILE = ".mdauth"
 
-    def __init__(self):
+    def __init__(self, md):
+        self.md = md
         self.user = None
         self._auth = None
         self._load_auth()
@@ -96,7 +97,7 @@ class APIHandler:
 
 class MdAPI:
     def __init__(self):
-        self.api = APIHandler()
+        self.api = APIHandler(self)
 
         self.account = AccountAPI(self.api)
         self.auth = AuthAPI(self.api)

@@ -1,10 +1,7 @@
 import os
-from devtools import debug
 import click
 
 from .mdapi import MdAPI, MdException
-from .schema_new import EditManga, NewManga
-from .schema import LocalizedString
 
 
 def sanitize(x):
@@ -123,7 +120,4 @@ def read(chapter):
 
 
 def main():
-    try:
-        cli()
-    except MdException as e:
-        debug(e.args[0])
+    cli()
