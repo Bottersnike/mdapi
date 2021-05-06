@@ -66,7 +66,7 @@ class ChapterAPI:
                     f"Invalid status code: {req.status_code}", fg="red"
                 ))
                 continue
-            total_length = req.headers.get('content-length')
+            total_length = int(req.headers.get('content-length'))
             if not total_length:
                 click.echo(click.style(
                     "Failed to get file length", fg="red"

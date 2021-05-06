@@ -133,8 +133,8 @@ class Manga(BaseType):
     year: Optional[int]
     contentRating: Optional[ContentRating]
     tags: List[Any]
-    createdAt: datetime
-    updatedAt: datetime
+    createdAt: Optional[datetime]
+    updatedAt: Optional[datetime]
     readingStatus: Optional[ReadingStatus]
 
 
@@ -148,9 +148,9 @@ class Chapter(BaseType):
     hash: str
     data: List[str]
     dataSaver: Optional[List[str]]
-    publishAt: datetime
-    createdAt: datetime
-    updatedAt: datetime
+    publishAt: Optional[datetime]
+    createdAt: Optional[datetime]
+    updatedAt: Optional[datetime]
 
 
 class ScanlationGroup(BaseType):
@@ -158,8 +158,8 @@ class ScanlationGroup(BaseType):
 
     name: str
     leader: Type
-    createdAt: datetime
-    updatedAt: datetime
+    createdAt: Optional[datetime]
+    updatedAt: Optional[datetime]
 
 
 class Tag(BaseType):
@@ -190,5 +190,5 @@ class Author(BaseType):
     name: str
     imageUrl: Optional[str]
     biography: List[LocalizedString]
-    createdAt: datetime
-    updatedAt: datetime
+    createdAt: Optional[datetime]
+    updatedAt: Optional[datetime]

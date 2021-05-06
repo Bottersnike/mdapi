@@ -82,7 +82,7 @@ def search(query):
 @click.argument("manga", nargs=1)
 def chapters(manga):
     md = MdAPI()
-    results = md.get_chapters(manga)
+    results = md.manga.get_chapters(manga)
     results._ensure_populated()
 
     click.echo(click.style(f" -=- {results.total} chapters -=-", fg="green"))
@@ -105,12 +105,12 @@ def chapters(manga):
 @click.argument("chapter", nargs=1)
 def read(chapter):
     md = MdAPI()
-    chapter = md.get_chapter(chapter)
+    chapter = md.chapter.get(chapter)
     manga = None
 
     for i in chapter.relationships:
         if i.type == "manga":
-            manga = md.get_manga(i.id)
+            manga = md.manga.get(i.id)
             break
     else:
         click.echo(click.style("Failed to locate parent manga", fg="red"))
@@ -119,7 +119,7 @@ def read(chapter):
     path = f"Manga/{sanitize(str(manga.title) or 'No title')}/{chapter.chapter}/"
     click.echo(f"Downloading to {path}")
     os.makedirs(path, exist_ok=True)
-    md.download(chapter, path)
+    md.chapter.download(chapter, path)
 
 
 def main():
