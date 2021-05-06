@@ -50,9 +50,10 @@ class ChapterAPI:
         })
 
     def download(self, chapter, path):
-        base = self.api.md.misc.get_md_at_home_url(chapter)
+        # base = self.api.md.misc.get_md_at_home_url(chapter)
+        base = "https://reh3tgm2rs8sr.xnvda7fch4zhr.mangadex.network"
 
-        for i in chapter.data:
+        def worker(i):
             url = f"{base}/data/{chapter.hash}/{i}"
             req = requests.get(url, stream=True)
             if req.url != url:
@@ -64,15 +65,22 @@ class ChapterAPI:
                 click.echo(click.style(
                     f"Invalid status code: {req.status_code}", fg="red"
                 ))
-                continue
+                return
             total_length = int(req.headers.get('content-length'))
             if not total_length:
                 click.echo(click.style(
                     "Failed to get file length", fg="red"
                 ))
-                continue
+                return
 
             with open(os.path.join(path, i), "wb") as f:
                 with click.progressbar(label=i, length=total_length) as bar:
                     size = f.write(req.content)
                     bar.update(size)
+        pool = []
+        import threading
+        for i in chapter.data:
+            pool.append(threading.Thread(target=worker, args=(i, )))
+            pool[-1].start()
+        for i in pool:
+            i.join()

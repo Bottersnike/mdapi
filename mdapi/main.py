@@ -23,13 +23,13 @@ def login():
             "Would you like to login to a different account?"
         ):
             return
-        md.logout()
+        md.auth.logout()
 
     username = click.prompt("Username")
     password = click.prompt("Password", hide_input=True)
 
     try:
-        md.login(username, password)
+        md.auth.login(username, password)
     except MdException:
         click.echo(click.style("Username or password incorrect!", fg="red"))
     else:
@@ -43,7 +43,7 @@ def logout():
     if md.user is None:
         click.echo(click.style("You are not logged in", fg="red"))
     else:
-        md.logout()
+        md.auth.logout()
 
 
 @cli.command()
