@@ -70,7 +70,7 @@ class MangaAPI:
             urlparams={"manga": _type_id(manga)}
         )
 
-    def get_chapters(self, manga, locales=[]):
+    def get_chapters(self, manga, locales=""):
         return PaginatedRequest(
             self.api,
             Endpoints.Manga.CHAPTERS,

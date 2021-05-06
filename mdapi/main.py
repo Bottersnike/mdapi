@@ -77,9 +77,10 @@ def search(query):
 
 @cli.command()
 @click.argument("manga", nargs=1)
-def chapters(manga):
+@click.option("-l", "--locales", default="en")
+def chapters(manga, locales):
     md = MdAPI()
-    results = md.manga.get_chapters(manga)
+    results = md.manga.get_chapters(manga, locales=locales)
     results._ensure_populated()
 
     click.echo(click.style(f" -=- {results.total} chapters -=-", fg="green"))
@@ -98,10 +99,10 @@ def chapters(manga):
             break
 
 
-def read_manga(manga, locales=None):
+def read_manga(manga, locales="en"):
     md = MdAPI()
     manga = md.manga.get(manga)
-    results = md.manga.get_chapters(manga.id, locales=locales or [])
+    results = md.manga.get_chapters(manga.id, locales=locales)
     results._ensure_populated()
     if not click.confirm(f"This will download {results.total} chapters. Proceed?"):
         return
@@ -116,7 +117,7 @@ def read_manga(manga, locales=None):
 
 @cli.command()
 @click.argument("chapter", nargs=1)
-@click.option("-l", "--locales", default=None)
+@click.option("-l", "--locales", default="en")
 def read(chapter, locales):
     md = MdAPI()
     chapter_ = md.chapter.get(chapter)
