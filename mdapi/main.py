@@ -98,11 +98,31 @@ def chapters(manga):
             break
 
 
+def read_manga(manga):
+    md = MdAPI()
+    manga = md.manga.get(manga)
+    results = md.manga.get_chapters(manga.id)
+    results._ensure_populated()
+    if not click.confirm(f"This will download {results.total} chapters. Proceed?"):
+        return
+
+    for chapter in results:
+        click.echo(f"Downloading chapter {chapter.chapter}")
+        path = f"Manga/{sanitize(str(manga.title) or 'No title')}/{chapter.chapter}/"
+        click.echo(f"Downloading to {path}")
+        os.makedirs(path, exist_ok=True)
+        md.chapter.download(chapter, path)
+
+
 @cli.command()
 @click.argument("chapter", nargs=1)
 def read(chapter):
     md = MdAPI()
-    chapter = md.chapter.get(chapter)
+    chapter_ = md.chapter.get(chapter)
+    if chapter_ is None:
+        return read_manga(chapter)
+    chapter = chapter_
+
     manga = None
 
     for i in chapter.relationships:
