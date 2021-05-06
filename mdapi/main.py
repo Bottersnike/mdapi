@@ -98,17 +98,17 @@ def chapters(manga):
             break
 
 
-def read_manga(manga):
+def read_manga(manga, locales=None):
     md = MdAPI()
     manga = md.manga.get(manga)
-    results = md.manga.get_chapters(manga.id)
+    results = md.manga.get_chapters(manga.id, locales=locales or [])
     results._ensure_populated()
     if not click.confirm(f"This will download {results.total} chapters. Proceed?"):
         return
 
     for chapter in results:
         click.echo(f"Downloading chapter {chapter.chapter}")
-        path = f"Manga/{sanitize(str(manga.title) or 'No title')}/{chapter.chapter}/"
+        path = f"Manga/{sanitize(str(manga.title) or 'No title')}/{chapter.translatedLanguage}-{chapter.chapter}/"
         click.echo(f"Downloading to {path}")
         os.makedirs(path, exist_ok=True)
         md.chapter.download(chapter, path)
@@ -116,11 +116,12 @@ def read_manga(manga):
 
 @cli.command()
 @click.argument("chapter", nargs=1)
-def read(chapter):
+@click.option("-l", "--locales", default=None)
+def read(chapter, locales):
     md = MdAPI()
     chapter_ = md.chapter.get(chapter)
     if chapter_ is None:
-        return read_manga(chapter)
+        return read_manga(chapter, locales)
     chapter = chapter_
 
     manga = None
