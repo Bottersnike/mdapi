@@ -6,7 +6,7 @@ with open("README.md", encoding="utf-8") as file_:
 
 
 setuptools.setup(
-    name="md",
+    name="mdex",
     version="0.0.1",
     author="Bottersnike",
     author_email="bottersnike237@gmail.com",
@@ -25,6 +25,6 @@ setuptools.setup(
     scripts=[
         "scripts/mdex.py"
     ],
-    packages=["md"],
+    packages=["mdex"],
     python_requires=">=3.8",
 )
