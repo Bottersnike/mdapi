@@ -7,15 +7,15 @@ with open("README.md", encoding="utf-8") as file_:
 
 setuptools.setup(
     name="mdex",
-    version="0.0.1",
+    version="0.0.3",
     author="Bottersnike",
     author_email="bottersnike237@gmail.com",
     description="Mangadex CLI",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/Bottersnike/md-cli",
+    url="https://github.com/Bottersnike/mdapi",
     project_urls={
-        "Bug Tracker": "https://github.com/Bottersnike/md-cli/issues",
+        "Bug Tracker": "https://github.com/Bottersnike/mdapi/issues",
     },
     classifiers=[
         "Programming Language :: Python :: 3",
