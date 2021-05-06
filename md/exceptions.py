@@ -1,0 +1,2 @@
+class MdException(Exception):
+    pass
