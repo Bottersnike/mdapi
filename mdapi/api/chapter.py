@@ -1,10 +1,10 @@
 import os
 
 import requests
-import click
 
 from ..util import PaginatedRequest, _type_id
 from ..endpoints import Endpoints
+from ..exceptions import NoFollowRedirect, InvalidStatusCode, InvalidFileLength
 from ..schema import Type
 
 
@@ -49,38 +49,40 @@ class ChapterAPI:
             "chapter": _type_id(chapter)
         })
 
-    def download(self, chapter, path):
-        # base = self.api.md.misc.get_md_at_home_url(chapter)
-        base = "https://reh3tgm2rs8sr.xnvda7fch4zhr.mangadex.network"
+    def page_urls_for(self, chapter, data_saver=False):
+        # Manual override for testing
+        if "MD_CHAPTER_BASE_URL" in os.environ:
+            base = os.environ.get("MD_CHAPTER_BASE_URL")
+        else:
+            base = self.api.md.misc.get_md_at_home_url(chapter)
 
-        def worker(i):
-            url = f"{base}/data/{chapter.hash}/{i}"
-            req = requests.get(url, stream=True)
-            if req.url != url:
-                click.echo(click.style(
-                    f"Refusing to follow redirect to {req.url}", fg="red"
-                ))
-                return
-            if req.status_code != 200:
-                click.echo(click.style(
-                    f"Invalid status code: {req.status_code}", fg="red"
-                ))
-                return
-            total_length = int(req.headers.get('content-length'))
-            if not total_length:
-                click.echo(click.style(
-                    "Failed to get file length", fg="red"
-                ))
-                return
+        base += "/data-saver/" if data_saver else "/data/"
+        base += chapter.hash + "/"
 
-            with open(os.path.join(path, i), "wb") as f:
-                with click.progressbar(label=i, length=total_length) as bar:
-                    size = f.write(req.content)
-                    bar.update(size)
-        pool = []
-        import threading
-        for i in chapter.data:
-            pool.append(threading.Thread(target=worker, args=(i, )))
-            pool[-1].start()
-        for i in pool:
-            i.join()
+        for i in chapter.dataSaver if data_saver else chapter.data:
+            yield base + i
+
+    def download_page(self, url, follow_redirect=False):
+        req = requests.get(url, stream=True)
+        if req.url != url and not follow_redirect:
+            raise NoFollowRedirect(req.url)
+        if req.status_code != 200:
+            raise InvalidStatusCode(req.status_code)
+
+        total_length = int(req.headers.get('content-length'))
+        if not total_length:
+            raise InvalidFileLength(total_length)
+
+        chunk_size = 131072  # 0.125 MB
+        for chunk in req.iter_content(chunk_size=chunk_size):
+            yield (chunk, total_length)
+
+    def download_page_to(
+        self, url, output, follow_redirect=False, is_iter=False
+    ):
+        downloaded = 0
+        for chunk, total_length in self.download_page(url, follow_redirect):
+            downloaded += len(chunk)
+            output.write(chunk)
+            if is_iter:
+                yield (downloaded, total_length)

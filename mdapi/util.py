@@ -25,6 +25,8 @@ class PaginatedRequest:
         self._args = args
         self._kwargs = kwargs
 
+        self._ensure_populated()
+
     def _get_next(self):
         results = self._api._make_request(*self._args, **self._kwargs, params={
             **self._params,

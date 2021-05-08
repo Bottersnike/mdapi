@@ -17,7 +17,7 @@ class AuthAPI:
 
         self.api._authenticate(username, token)
 
-    def check_auth(self):
+    def check(self):
         return self.api._make_request(Endpoints.Auth.CHECK)
 
     def logout(self):

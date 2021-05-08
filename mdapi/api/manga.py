@@ -19,8 +19,8 @@ class MangaAPI:
         return PaginatedRequest(self.api, Endpoints.Manga.SEARCH, params={
             "limit": limit, "offset": offset, "title": title,
             "authors": authors, "artists": artists, "year": year,
-            "includedTags": includedTags, "includedTagsMode": includedTagsMode,
-            "excludedTags": excludedTags, "excludedTagsMode": excludedTagsMode,
+            "includedTags[]": includedTags, "includedTagsMode": includedTagsMode,
+            "excludedTags[]": excludedTags, "excludedTagsMode": excludedTagsMode,
             "status": status, "originalLanguage": originalLanguage,
             "publicationDemographic": publicationDemographic, "ids": ids,
             "contentRating": contentRating, "createdAt": createdAt
@@ -70,7 +70,7 @@ class MangaAPI:
             urlparams={"manga": _type_id(manga)}
         )
 
-    def get_chapters(self, manga, locales=""):
+    def get_chapters(self, manga, locales=None):
         return PaginatedRequest(
             self.api,
             Endpoints.Manga.CHAPTERS,

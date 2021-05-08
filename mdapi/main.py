@@ -99,6 +99,19 @@ def chapters(manga, locales):
             break
 
 
+def download_chapter(md, chapter, path):
+    for n, page in enumerate(md.chapter.page_urls_for(chapter)):
+        ext = page.split(".")[-1]
+        filename = f"{n + 1:03}.{ext}"
+        with open(os.path.join(path, filename), "wb") as f:
+            with click.progressbar(label=filename, length=1) as bar:
+                for downloaded, total_length in (
+                    md.chapter.download_page_to(page, f, is_iter=True)
+                ):
+                    bar.pos = downloaded / total_length
+                    bar.update(0)
+
+
 def read_manga(manga, locales="en"):
     md = MdAPI()
     manga = md.manga.get(manga)
@@ -109,10 +122,13 @@ def read_manga(manga, locales="en"):
 
     for chapter in results:
         click.echo(f"Downloading chapter {chapter.chapter}")
-        path = f"Manga/{sanitize(str(manga.title) or 'No title')}/{chapter.translatedLanguage}-{chapter.chapter}/"
+        path = (
+            f"Manga/{sanitize(str(manga.title) or 'No title')}/"
+            f"{chapter.translatedLanguage}-{chapter.chapter}/"
+        )
         click.echo(f"Downloading to {path}")
         os.makedirs(path, exist_ok=True)
-        md.chapter.download(chapter, path)
+        download_chapter(md, chapter, path)
 
 
 @cli.command()
@@ -135,10 +151,13 @@ def read(chapter, locales):
         click.echo(click.style("Failed to locate parent manga", fg="red"))
         return
 
-    path = f"Manga/{sanitize(str(manga.title) or 'No title')}/{chapter.chapter}/"
+    path = (
+        f"Manga/{sanitize(str(manga.title) or 'No title')}/{chapter.chapter}/"
+    )
     click.echo(f"Downloading to {path}")
     os.makedirs(path, exist_ok=True)
-    md.chapter.download(chapter, path)
+
+    download_chapter(md, chapter, path)
 
 
 def main():
