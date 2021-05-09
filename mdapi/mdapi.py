@@ -5,7 +5,7 @@ import click
 
 import requests
 
-from .exceptions import MdException
+from .exceptions import MdException, NotLoggedIn, ActionForbidden
 from .api import (
     AccountAPI, AuthAPI, AuthorAPI, ChapterAPI, GroupAPI, ListAPI, MangaAPI,
     MiscAPI, UserAPI
@@ -74,10 +74,13 @@ class APIHandler:
         if self.DEBUG:
             click.echo(click.style(f" -> {action[0]} {req.url}", fg="yellow"))
 
-        if req.status_code == 204:
-            resp = {}
-        else:
-            resp = req.json()
+        if req.status_code == 401:
+            raise NotLoggedIn()
+        elif req.status_code == 403:
+            raise ActionForbidden()
+
+        resp = {} if req.status_code == 204 else req.json()
+
         if req.status_code < 200 or req.status_code > 299:
             raise MdException(resp.get("errors", []))
 

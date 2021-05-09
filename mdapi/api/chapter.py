@@ -109,7 +109,7 @@ class ChapterAPI(APIBase):
                     url, False, is_cached, bytes_downloaded,
                     req.elapsed.microseconds // 1000
                 )
-            raise DownloadException
+            raise DownloadException()
 
         if report_mdah:
             self.md.misc.report_mdah(

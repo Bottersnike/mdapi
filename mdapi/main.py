@@ -3,7 +3,7 @@ import os
 
 import click
 
-from .mdapi import MdAPI, MdException
+from .mdapi import MdAPI, MdException, NotLoggedIn
 
 
 def sanitize(x):
@@ -27,7 +27,7 @@ def cli():
 
 @cli.command()
 @uses_md
-def login(md):
+def login(md: MdAPI):
     if md.user is not None:
         if not click.confirm(
             "You are already logged in. "
@@ -41,15 +41,17 @@ def login(md):
 
     try:
         md.auth.login(username, password)
-    except MdException:
+    except NotLoggedIn:
         click.echo(click.style("Username or password incorrect!", fg="red"))
+    except MdException:
+        click.echo(click.style("Failed to login.", fg="red"))
     else:
         click.echo(click.style(f"Logged in as {username}", fg="green"))
 
 
 @cli.command()
 @uses_md
-def logout(md):
+def logout(md: MdAPI):
     if md.user is None:
         click.echo(click.style("You are not logged in", fg="red"))
     else:
@@ -58,8 +60,12 @@ def logout(md):
 
 @cli.command()
 @uses_md
-def whoami(md):
-    user = md.get_user()
+def whoami(md: MdAPI):
+    try:
+        user = md.user.get_self()
+    except NotLoggedIn:
+        click.echo(click.style("Not logged in", fg="red"))
+        return
 
     click.echo(user.username)
 
@@ -67,7 +73,7 @@ def whoami(md):
 @cli.command()
 @uses_md
 @click.argument("query", nargs=-1)
-def search(md, query):
+def search(md: MdAPI, query):
     results = md.manga.search(title=" ".join(query))
     results._ensure_populated()
 
@@ -86,7 +92,7 @@ def search(md, query):
 @uses_md
 @click.argument("manga", nargs=1)
 @click.option("-l", "--locales", default="en")
-def chapters(md, manga, locales):
+def chapters(md: MdAPI, manga, locales):
     results = md.manga.get_chapters(manga, locales=locales)
     results._ensure_populated()
 
@@ -106,7 +112,7 @@ def chapters(md, manga, locales):
             break
 
 
-def download_chapter(md, chapter, path):
+def download_chapter(md: MdAPI, chapter, path):
     for n, page in enumerate(md.chapter.page_urls_for(chapter)):
         ext = page.split(".")[-1]
         filename = f"{n + 1:03}.{ext}"
@@ -133,12 +139,14 @@ def read_manga(manga, locales="en"):
         return
 
     for chapter in results:
-        click.echo(f"Downloading chapter {chapter.chapter}")
+        click.echo(
+            click.style(f"Downloading chapter {chapter.chapter}", fg="green")
+        )
         path = (
             f"Manga/{sanitize(str(manga.title) or 'No title')}/"
             f"{chapter.translatedLanguage}-{chapter.chapter}/"
         )
-        click.echo(f"Downloading to {path}")
+        click.echo(click.style(f"Downloading to {path}", fg="green"))
         os.makedirs(path, exist_ok=True)
         download_chapter(md, chapter, path)
 
@@ -147,7 +155,7 @@ def read_manga(manga, locales="en"):
 @uses_md
 @click.argument("chapter", nargs=1)
 @click.option("-l", "--locales", default="en")
-def read(md, chapter, locales):
+def read(md: MdAPI, chapter, locales):
     chapter_ = md.chapter.get(chapter)
     if chapter_ is None:
         return read_manga(chapter, locales)
@@ -166,7 +174,7 @@ def read(md, chapter, locales):
     path = (
         f"Manga/{sanitize(str(manga.title) or 'No title')}/{chapter.chapter}/"
     )
-    click.echo(f"Downloading to {path}")
+    click.echo(click.style(f"Downloading to {path}", fg="green"))
     os.makedirs(path, exist_ok=True)
 
     download_chapter(md, chapter, path)

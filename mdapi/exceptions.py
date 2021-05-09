@@ -2,6 +2,14 @@ class MdException(Exception):
     pass
 
 
+class NotLoggedIn(MdException):
+    pass
+
+
+class ActionForbidden(MdException):
+    pass
+
+
 class DownloadException(MdException):
     pass
 
