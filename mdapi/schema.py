@@ -1,15 +1,18 @@
-from typing import Any, List, Optional, Literal
+from typing import Any, Dict, List, Optional, Literal
 from datetime import datetime
 from pydantic import BaseModel
 
 
 PublicationDemographic = Literal["shounen", "shoujo", "josei", "seinen"]
-Status = Literal["ongoing", "completed", "hiatus", "abandoned"]
+Status = Literal["ongoing", "completed", "hiatus", "cancelled"]
 ReadingStatus = Literal[
     "reading", "on_hold", "plan_to_read", "dropped", "re_reading", "completed"
 ]
 ContentRating = Literal["safe", "suggestive", "erotica", "pornographic"]
 CustomListVisibility = Literal["public", "private"]
+LinksKey = Literal[
+    "al", "ap", "bw", "cdj", "mu", "nu", "kt", "amz", "ebj", "mal", "raw", "engtl"
+]
 
 
 class LocalizedString(dict):
@@ -40,6 +43,9 @@ class LocalizedString(dict):
 
     def __str__(self):
         return self.text
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}({self.lang}:{self.text})"
 
     @classmethod
     def __get_validators__(cls):
@@ -117,6 +123,14 @@ class User(BaseType):
     username: str
 
 
+class Tag(BaseType):
+    type = "tag"
+
+    name: LocalizedString
+    restricted: Optional[bool]
+    version: Optional[int]
+
+
 class Manga(BaseType):
     type = "manga"
 
@@ -124,7 +138,7 @@ class Manga(BaseType):
     altTitles: List[LocalizedString]
     description: LocalizedString
     isLocked: bool
-    links: Optional[Any]
+    links: Optional[Dict[LinksKey, str]]
     originalLanguage: str
     lastVolume: Optional[str]
     lastChapter: Optional[str]
@@ -132,7 +146,7 @@ class Manga(BaseType):
     status: Optional[Status]
     year: Optional[int]
     contentRating: Optional[ContentRating]
-    tags: List[Any]
+    tags: List[Type]
     createdAt: Optional[datetime]
     updatedAt: Optional[datetime]
     readingStatus: Optional[ReadingStatus]
@@ -142,6 +156,7 @@ class Chapter(BaseType):
     type = "chapter"
 
     volume: Optional[str]
+    chapter: Optional[str]
     chapter: str
     title: Optional[str]
     translatedLanguage: str
@@ -160,13 +175,6 @@ class ScanlationGroup(BaseType):
     leader: Type
     createdAt: Optional[datetime]
     updatedAt: Optional[datetime]
-
-
-class Tag(BaseType):
-    type = "tag"
-
-    name: LocalizedString
-    restricted: bool
 
 
 class CustomList(BaseType):

@@ -12,7 +12,7 @@ def _type_id(type):
 
 
 class PaginatedRequest:
-    _LIMIT = 15
+    _LIMIT = 100
 
     def __init__(self, api, *args, **kwargs):
         self.total = None

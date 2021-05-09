@@ -7,9 +7,11 @@ class MiscAPI:
     def __init__(self, api):
         self.api = api
 
-    def get_md_at_home_url(self, chapter):
+    def get_md_at_home_url(self, chapter, force_port_443=False):
         return self.api._make_request(Endpoints.GET_MD_AT_HOME, urlparams={
             "chapter": _type_id(chapter)
+        }, params={
+            "forcePort443": True if force_port_443 else None
         })["baseUrl"]
 
     def solve_captcha(self, challenge):

@@ -50,13 +50,13 @@ class MangaAPI:
             urlparams={"manga": _type_id(manga)}
         ))
 
-    def get_tags(self):
+    def all_tags(self):
         return [
             Type.parse_obj(i.get("data"))
             for i in self.api._make_request(Endpoints.Manga.TAGS)
         ]
 
-    def get_random(self):
+    def random(self):
         return Type.parse_obj(self.api._make_request(Endpoints.Manga.RANDOM))
 
     def create(self, manga: NewManga):
