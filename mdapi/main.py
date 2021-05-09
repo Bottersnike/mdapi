@@ -14,8 +14,8 @@ def uses_md(func):
     @click.option("--debug", is_flag=True)
     @functools.wraps(func)
     def wrapper(debug, *args, **kwargs):
+        MdAPI.DEBUG = debug
         md = MdAPI()
-        md.api.DEBUG = debug
         return func(md, *args, **kwargs)
     return wrapper
 

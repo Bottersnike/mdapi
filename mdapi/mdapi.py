@@ -1,15 +1,18 @@
+import click
 import os
 import platform
 import json
-import click
 
 import requests
 
-from .exceptions import MdException, NotLoggedIn, ActionForbidden
+from .exceptions import (
+    MdException, NotLoggedIn, ActionForbidden, RefreshTokenFailed
+)
 from .api import (
     AccountAPI, AuthAPI, AuthorAPI, ChapterAPI, GroupAPI, ListAPI, MangaAPI,
     MiscAPI, UserAPI
 )
+from .util import _is_token_expired
 
 
 class APIHandler:
@@ -24,7 +27,6 @@ class APIHandler:
         self.md = md
         self.user = None
         self._auth = None
-        self._load_auth()
 
     def _save_auth(self):
         with open(self.AUTH_FILE, "w") as auth_file:
@@ -52,6 +54,21 @@ class APIHandler:
         self.user = user
         self._auth = _auth
 
+        self._check_expired(silent_error=True)
+
+    def _check_expired(self, silent_error=False):
+        if self._auth is None:
+            return
+
+        if _is_token_expired(self._auth["session"]):
+            try:
+                self.md.auth.refresh()
+            except MdException:
+                if silent_error:
+                    self.user = self._auth = None
+                else:
+                    raise RefreshTokenFailed()
+
     def _get_headers(self):
         headers = {}
         if self._auth is not None:
@@ -60,6 +77,8 @@ class APIHandler:
         return headers
 
     def _make_request(self, action, body=None, params=None, urlparams=None):
+        self._check_expired()
+
         needs_base = not action[1].startswith(("http://", "https://"))
         url = (
             (self.BASE if needs_base else "")
@@ -74,12 +93,12 @@ class APIHandler:
         if self.DEBUG:
             click.echo(click.style(f" -> {action[0]} {req.url}", fg="yellow"))
 
-        if req.status_code == 401:
-            raise NotLoggedIn()
-        elif req.status_code == 403:
-            raise ActionForbidden()
-
         resp = {} if req.status_code == 204 else req.json()
+
+        if req.status_code == 401:
+            raise NotLoggedIn(resp)
+        elif req.status_code == 403:
+            raise ActionForbidden(resp)
 
         if req.status_code < 200 or req.status_code > 299:
             raise MdException(resp.get("errors", []))
@@ -106,8 +125,11 @@ class APIHandler:
 
 
 class MdAPI:
+    DEBUG = False
+
     def __init__(self):
         self.api = APIHandler(self)
+        self.api.DEBUG = self.DEBUG
 
         self.account = AccountAPI(self, self.api)
         self.auth = AuthAPI(self, self.api)
@@ -118,3 +140,5 @@ class MdAPI:
         self.manga = MangaAPI(self, self.api)
         self.misc = MiscAPI(self, self.api)
         self.user = UserAPI(self, self.api)
+
+        self.api._load_auth()

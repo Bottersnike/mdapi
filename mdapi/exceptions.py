@@ -10,6 +10,10 @@ class ActionForbidden(MdException):
     pass
 
 
+class RefreshTokenFailed(MdException):
+    pass
+
+
 class DownloadException(MdException):
     pass
 

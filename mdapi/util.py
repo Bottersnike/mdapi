@@ -1,3 +1,7 @@
+import base64
+import json
+import time
+
 from pydantic.main import BaseModel
 
 from .schema import Type
@@ -9,6 +13,16 @@ def _type_id(type):
     if isinstance(type, BaseModel):
         return type.id
     return type
+
+
+def _get_token_expires(jwt):
+    payload = jwt.split(".")[1]
+    payload = json.loads(base64.b64decode(payload + "=="))
+    return payload["exp"]
+
+
+def _is_token_expired(jwt):
+    return _get_token_expires(jwt) <= time.time()
 
 
 class PaginatedRequest:
@@ -68,5 +82,5 @@ class PaginatedRequest:
 
 
 __all__ = (
-    "_type_id", "PaginatedRequest"
+    "_type_id", "_get_token_expires", "_is_token_expired", "PaginatedRequest"
 )
