@@ -2,6 +2,7 @@ from ..endpoints import Endpoints
 from ..exceptions import MdException
 from .base import APIBase
 
+
 class AuthAPI(APIBase):
     def login(self, username, password):
         try:

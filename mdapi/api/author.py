@@ -3,6 +3,7 @@ from ..endpoints import Endpoints
 from ..schema import Type
 from .base import APIBase
 
+
 class AuthorAPI(APIBase):
     def create(self, name):
         return Type.parse_obj(self.api._make_request(

@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Literal
+from typing import Dict, List, Optional, Literal
 from datetime import datetime
 from pydantic import BaseModel
 
@@ -11,7 +11,8 @@ ReadingStatus = Literal[
 ContentRating = Literal["safe", "suggestive", "erotica", "pornographic"]
 CustomListVisibility = Literal["public", "private"]
 LinksKey = Literal[
-    "al", "ap", "bw", "cdj", "mu", "nu", "kt", "amz", "ebj", "mal", "raw", "engtl"
+    "al", "ap", "bw", "cdj", "mu", "nu", "kt", "amz", "ebj", "mal",
+    "raw", "engtl"
 ]
 
 

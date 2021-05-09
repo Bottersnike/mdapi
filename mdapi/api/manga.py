@@ -17,8 +17,10 @@ class MangaAPI(APIBase):
         return PaginatedRequest(self.api, Endpoints.Manga.SEARCH, params={
             "limit": limit, "offset": offset, "title": title,
             "authors": authors, "artists": artists, "year": year,
-            "includedTags[]": includedTags, "includedTagsMode": includedTagsMode,
-            "excludedTags[]": excludedTags, "excludedTagsMode": excludedTagsMode,
+            "includedTags[]": includedTags,
+            "includedTagsMode": includedTagsMode,
+            "excludedTags[]": excludedTags,
+            "excludedTagsMode": excludedTagsMode,
             "status": status, "originalLanguage": originalLanguage,
             "publicationDemographic": publicationDemographic, "ids": ids,
             "contentRating": contentRating, "createdAt": createdAt

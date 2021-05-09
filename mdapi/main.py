@@ -89,7 +89,9 @@ def chapters(manga, locales):
         for i in page:
             click.echo(click.style(i.id, fg="magenta"), nl=False)
             click.echo(" ", nl=False)
-            click.echo(click.style(f"({i.chapter}) ", fg="bright_blue"), nl=False)
+            click.echo(
+                click.style(f"({i.chapter}) ", fg="bright_blue"), nl=False
+            )
             if i.title:
                 click.echo(click.style(str(i.title), fg="blue"), nl=False)
             click.echo("")
@@ -117,7 +119,9 @@ def read_manga(manga, locales="en"):
     manga = md.manga.get(manga)
     results = md.manga.get_chapters(manga.id, locales=locales)
     results._ensure_populated()
-    if not click.confirm(f"This will download {results.total} chapters. Proceed?"):
+    if not click.confirm(
+        f"This will download {results.total} chapters. Proceed?"
+    ):
         return
 
     for chapter in results:
