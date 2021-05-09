@@ -1,4 +1,6 @@
+import functools
 import os
+
 import click
 
 from .mdapi import MdAPI, MdException
@@ -8,15 +10,24 @@ def sanitize(x):
     return "".join(i for i in x if (i.isalnum() or i in "._- "))
 
 
+def uses_md(func):
+    @click.option("--debug", is_flag=True)
+    @functools.wraps(func)
+    def wrapper(debug, *args, **kwargs):
+        md = MdAPI()
+        md.api.DEBUG = debug
+        return func(md, *args, **kwargs)
+    return wrapper
+
+
 @click.group()
 def cli():
     pass
 
 
 @cli.command()
-def login():
-    md = MdAPI()
-
+@uses_md
+def login(md):
     if md.user is not None:
         if not click.confirm(
             "You are already logged in. "
@@ -37,9 +48,8 @@ def login():
 
 
 @cli.command()
-def logout():
-    md = MdAPI()
-
+@uses_md
+def logout(md):
     if md.user is None:
         click.echo(click.style("You are not logged in", fg="red"))
     else:
@@ -47,18 +57,17 @@ def logout():
 
 
 @cli.command()
-def whoami():
-    md = MdAPI()
-
+@uses_md
+def whoami(md):
     user = md.get_user()
 
     click.echo(user.username)
 
 
 @cli.command()
+@uses_md
 @click.argument("query", nargs=-1)
-def search(query):
-    md = MdAPI()
+def search(md, query):
     results = md.manga.search(title=" ".join(query))
     results._ensure_populated()
 
@@ -69,17 +78,15 @@ def search(query):
             click.echo(click.style(i.id, fg="magenta"), nl=False)
             click.echo(" ", nl=False)
             click.echo(click.style(str(i.title), fg="bright_blue"))
-        # click.echo("---")
-        # click.echo(i.description)
         if not click.confirm("Show more?"):
             break
 
 
 @cli.command()
+@uses_md
 @click.argument("manga", nargs=1)
 @click.option("-l", "--locales", default="en")
-def chapters(manga, locales):
-    md = MdAPI()
+def chapters(md, manga, locales):
     results = md.manga.get_chapters(manga, locales=locales)
     results._ensure_populated()
 
@@ -95,8 +102,6 @@ def chapters(manga, locales):
             if i.title:
                 click.echo(click.style(str(i.title), fg="blue"), nl=False)
             click.echo("")
-        # click.echo("---")
-        # click.echo(i.description)
         if not click.confirm("Show more?"):
             break
 
@@ -107,11 +112,14 @@ def download_chapter(md, chapter, path):
         filename = f"{n + 1:03}.{ext}"
         with open(os.path.join(path, filename), "wb") as f:
             with click.progressbar(label=filename, length=1) as bar:
+                bar.update(0)
                 for downloaded, total_length in (
                     md.chapter.download_page_to(page, f, is_iter=True)
                 ):
                     bar.pos = downloaded / total_length
                     bar.update(0)
+                bar.pos = 1
+                bar.update(0)
 
 
 def read_manga(manga, locales="en"):
@@ -136,10 +144,10 @@ def read_manga(manga, locales="en"):
 
 
 @cli.command()
+@uses_md
 @click.argument("chapter", nargs=1)
 @click.option("-l", "--locales", default="en")
-def read(chapter, locales):
-    md = MdAPI()
+def read(md, chapter, locales):
     chapter_ = md.chapter.get(chapter)
     if chapter_ is None:
         return read_manga(chapter, locales)

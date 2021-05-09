@@ -18,6 +18,8 @@ class APIHandler:
 
     AUTH_FILE = ".mdauth"
 
+    DEBUG = False
+
     def __init__(self, md):
         self.md = md
         self.user = None
@@ -69,7 +71,8 @@ class APIHandler:
             params={k: v for k, v in (params or {}).items() if v is not None},
             headers=self._get_headers()
         )
-        click.echo(click.style(f" -> {action[0]} {req.url}", fg="yellow"))
+        if self.DEBUG:
+            click.echo(click.style(f" -> {action[0]} {req.url}", fg="yellow"))
 
         if req.status_code == 204:
             resp = {}
