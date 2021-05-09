@@ -74,3 +74,5 @@ class Endpoints:
     GET_MD_AT_HOME = ("GET", "/at-home/server/{chapter}")
     SOLVE_CAPTCHA = ("POST", "/captcha/solve")
     LEGACY_MAPPING = ("POST", "/legacy/mapping")
+
+    MDAH_REPORT = ("POST", "https://api.mangadex.network/report")

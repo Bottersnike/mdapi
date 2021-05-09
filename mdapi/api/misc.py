@@ -5,8 +5,6 @@ from .base import APIBase
 
 
 class MiscAPI(APIBase):
-    MDAH_REPORT = "https://api.mangadex.network/report"
-
     def get_md_at_home_url(self, chapter, force_port_443=False):
         return self.api._make_request(Endpoints.GET_MD_AT_HOME, urlparams={
             "chapter": _type_id(chapter)
@@ -32,7 +30,7 @@ class MiscAPI(APIBase):
         self, url: str, success: bool, cached: bool, num_bytes: int,
         duration: int
     ):
-        self.api._make_request(("POST", self.MDAH_REPORT), body={
+        self.api._make_request(Endpoints.MDAH_REPORT, body={
             "url": url, "success": success, "cached": cached,
             "bytes": num_bytes, "duration": duration
-        }, needs_base=False)
+        })

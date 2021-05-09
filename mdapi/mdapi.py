@@ -57,9 +57,8 @@ class APIHandler:
         headers["User-Agent"] = self.UA
         return headers
 
-    def _make_request(
-        self, action, body=None, params=None, urlparams=None, needs_base=True
-    ):
+    def _make_request(self, action, body=None, params=None, urlparams=None):
+        needs_base = not action[1].startswith(("http://", "https://"))
         url = (
             (self.BASE if needs_base else "")
             + action[1].format(**(urlparams or {}))
