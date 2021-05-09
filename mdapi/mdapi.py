@@ -57,8 +57,13 @@ class APIHandler:
         headers["User-Agent"] = self.UA
         return headers
 
-    def _make_request(self, action, body=None, params=None, urlparams=None):
-        url = self.BASE + action[1].format(**(urlparams or {}))
+    def _make_request(
+        self, action, body=None, params=None, urlparams=None, needs_base=True
+    ):
+        url = (
+            (self.BASE if needs_base else "")
+            + action[1].format(**(urlparams or {}))
+        )
         req = requests.request(
             action[0], url,
             json=body,
@@ -99,12 +104,12 @@ class MdAPI:
     def __init__(self):
         self.api = APIHandler(self)
 
-        self.account = AccountAPI(self.api)
-        self.auth = AuthAPI(self.api)
-        self.author = AuthorAPI(self.api)
-        self.chapter = ChapterAPI(self.api)
-        self.group = GroupAPI(self.api)
-        self.list = ListAPI(self.api)
-        self.manga = MangaAPI(self.api)
-        self.misc = MiscAPI(self.api)
-        self.user = UserAPI(self.api)
+        self.account = AccountAPI(self, self.api)
+        self.auth = AuthAPI(self, self.api)
+        self.author = AuthorAPI(self, self.api)
+        self.chapter = ChapterAPI(self, self.api)
+        self.group = GroupAPI(self, self.api)
+        self.list = ListAPI(self, self.api)
+        self.manga = MangaAPI(self, self.api)
+        self.misc = MiscAPI(self, self.api)
+        self.user = UserAPI(self, self.api)

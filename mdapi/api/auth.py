@@ -1,11 +1,8 @@
 from ..endpoints import Endpoints
 from ..exceptions import MdException
+from .base import APIBase
 
-
-class AuthAPI:
-    def __init__(self, api):
-        self.api = api
-
+class AuthAPI(APIBase):
     def login(self, username, password):
         try:
             token = self.api._make_request(Endpoints.Auth.LOGIN, {

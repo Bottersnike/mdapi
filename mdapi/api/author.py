@@ -1,12 +1,9 @@
 from ..util import PaginatedRequest, _type_id
 from ..endpoints import Endpoints
 from ..schema import Type
+from .base import APIBase
 
-
-class AuthorAPI:
-    def __init__(self, api):
-        self.api = api
-
+class AuthorAPI(APIBase):
     def create(self, name):
         return Type.parse_obj(self.api._make_request(
             Endpoints.Author.CREATE,

@@ -1,12 +1,10 @@
 from ..endpoints import Endpoints
 from ..util import PaginatedRequest, _type_id
 from ..schema import Type
+from .base import APIBase
 
 
-class UserAPI:
-    def __init__(self, api):
-        self.api = api
-
+class UserAPI(APIBase):
     def get_list(self):
         return PaginatedRequest(self.api, Endpoints.User.LIST)
 

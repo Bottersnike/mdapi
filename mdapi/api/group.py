@@ -1,12 +1,10 @@
 from ..util import PaginatedRequest, _type_id
 from ..endpoints import Endpoints
 from ..schema import Type
+from .base import APIBase
 
 
-class GroupAPI:
-    def __init__(self, api):
-        self.api = api
-
+class GroupAPI(APIBase):
     def search(self, limit=10, offset=0, name=None):
         return PaginatedRequest(self.api, Endpoints.Group.SEARCH, params={
             "limit": limit, "offset": offset, "name": name

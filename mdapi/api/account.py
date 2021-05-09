@@ -1,11 +1,9 @@
 from ..endpoints import Endpoints
 from ..schema import Type
+from .base import APIBase
 
 
-class AccountAPI:
-    def __init__(self, api):
-        self.api = api
-
+class AccountAPI(APIBase):
     def create(self, username, password, email):
         return Type.parse_obj(self.api._make_request(
             Endpoints.Account.CREATE, body={

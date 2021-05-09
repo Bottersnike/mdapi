@@ -2,12 +2,10 @@ from ..util import PaginatedRequest, _type_id
 from ..endpoints import Endpoints
 from ..schema import Type, ReadingStatus
 from ..schema_new import NewManga, EditManga
+from .base import APIBase
 
 
-class MangaAPI:
-    def __init__(self, api):
-        self.api = api
-
+class MangaAPI(APIBase):
     def search(
         self,
         limit=10, offset=0, title=None, authors=None, artists=None,

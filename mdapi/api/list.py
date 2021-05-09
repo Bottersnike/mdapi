@@ -1,12 +1,10 @@
 from ..util import PaginatedRequest, _type_id
 from ..endpoints import Endpoints
 from ..schema import Type
+from .base import APIBase
 
 
-class ListAPI:
-    def __init__(self, api):
-        self.api = api
-
+class ListAPI(APIBase):
     def create(self, name, visibility, manga):
         return Type.parse_obj(self.api._make_request(
             Endpoints.List.CREATE,
