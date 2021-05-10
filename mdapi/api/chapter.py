@@ -1,4 +1,3 @@
-from build.lib.mdapi.schema import Chapter, ScanlationGroup, User
 import os
 from typing import BinaryIO, Generator, List, Tuple
 
@@ -9,7 +8,10 @@ from ..endpoints import Endpoints
 from ..exceptions import (
     DownloadException, NoFollowRedirect, InvalidStatusCode, InvalidFileLength
 )
-from ..schema import ChaptersListOrder, LanguageCode, Type, Manga, TypeOrId
+from ..schema import (
+    ChaptersListOrder, LanguageCode, Type, Manga, TypeOrId, Chapter,
+    ScanlationGroup, User
+)
 from .base import APIBase
 
 
