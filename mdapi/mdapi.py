@@ -13,6 +13,7 @@ from .api import (
     MiscAPI, UserAPI
 )
 from .util import _is_token_expired
+from .endpoints import Endpoints
 
 
 class APIHandler:
@@ -77,7 +78,8 @@ class APIHandler:
         return headers
 
     def _make_request(self, action, body=None, params=None, urlparams=None):
-        self._check_expired()
+        if action != Endpoints.Auth.REFRESH:
+            self._check_expired()
 
         needs_base = not action[1].startswith(("http://", "https://"))
         url = (

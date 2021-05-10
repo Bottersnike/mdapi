@@ -1,4 +1,3 @@
-from typing import Optional
 from ..util import PaginatedRequest, _type_id
 from ..endpoints import Endpoints
 from ..schema import Author, Type, TypeOrId
@@ -24,7 +23,7 @@ class AuthorAPI(APIBase):
             body={"name": name}
         ))
 
-    def get(self, author: TypeOrId) -> Author:
+    def get(self, author: TypeOrId[Author]) -> Author:
         """
         Request full details for an author.
 
@@ -39,7 +38,7 @@ class AuthorAPI(APIBase):
         ))
 
     def search(
-        self, limit: int = 10, offset: int = 0, name: Optional[str] = None
+        self, limit: int = 10, offset: int = 0, name: str = None
     ) -> PaginatedRequest[Author]:
         """
         Search for an author by name.
@@ -54,7 +53,9 @@ class AuthorAPI(APIBase):
             "limit": limit, "offset": offset, "name": name
         })
 
-    def edit(self, author: TypeOrId, name: Optional[str] = None) -> None:
+    def edit(
+        self, author: TypeOrId[Author], name: str = None
+    ) -> None:
         """
         Make edits to a user. Currently only changing the author name is
         supported.
@@ -71,7 +72,7 @@ class AuthorAPI(APIBase):
             Endpoints.Author.EDIT, body=body, urlparams={"author": author.id}
         )
 
-    def delete(self, author: TypeOrId) -> None:
+    def delete(self, author: TypeOrId[Author]) -> None:
         """
         Delete an author.
 

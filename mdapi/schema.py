@@ -1,4 +1,7 @@
-from typing import Dict, List, Optional, Literal, Union
+from types import FunctionType
+from typing import (
+    Dict, Generator, List, Optional, Literal, Tuple, TypeVar, Union
+)
 from datetime import datetime
 from pydantic import BaseModel
 
@@ -14,42 +17,49 @@ LinksKey = Literal[
     "al", "ap", "bw", "cdj", "mu", "nu", "kt", "amz", "ebj", "mal",
     "raw", "engtl"
 ]
+LanguageCode = Optional[Literal[
+    "en", "pt-br", "ru", "fr", "es-la", "pl", "tr", "it", "es", "id", "vi",
+    "hu", "zh", "ar", "de", "zh-hk", "ca", "th", "bg", "fa", "uk", "mn", "he",
+    "ro", "ms", "tl", "ja", "ko", "hi", "my", "cs", "pt", "nl", "sv", "bn",
+    "no", "lt", "el", "sr", "da", "fi",
+]]
+SortOrder = Literal["asc", "desc"]
 
 
 class LocalizedString(dict):
-    def __init__(self, text, lang="en"):
+    def __init__(self, text: str, lang: LanguageCode = "en"):
         self.lang = lang
         self.text = text
 
-    def items(self):
+    def items(self) -> List[Tuple[LanguageCode, str]]:
         return [(self.lang, self.text)]
 
-    def keys(self):
+    def keys(self) -> List[LanguageCode]:
         return [self.lang]
 
-    def values(self):
+    def values(self) -> List[str]:
         return [self.text]
 
-    def __pretty__(self, fmt, **kwargs):
+    def __pretty__(self, fmt, **kwargs) -> Generator[str, None, None]:
         yield "<"
         yield self.lang
         yield " "
         yield fmt(self.text)
         yield ">"
 
-    def __getitem__(self, key):
+    def __getitem__(self, key) -> str:
         if key != self.lang:
             raise ValueError
         return self.text
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.text
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"{self.__class__.__name__}({self.lang}:{self.text})"
 
     @classmethod
-    def __get_validators__(cls):
+    def __get_validators__(cls) -> FunctionType:
         yield cls.return_i18n
 
     @classmethod
@@ -108,7 +118,10 @@ class Type(BaseModel):
         return self.__root__.dict()
 
 
-TypeOrId = Union[Type, str]
+T = TypeVar("T")
+
+
+TypeOrId = Union[T, str]
 
 
 class Relationship(BaseModel):
@@ -204,3 +217,19 @@ class Author(BaseType):
     biography: List[LocalizedString]
     createdAt: Optional[datetime]
     updatedAt: Optional[datetime]
+
+
+class BaseSortOrder(BaseModel):
+    def serialize(self):
+        return {
+            f"order[{i}]": getattr(self, i, None)
+            for i in self.__fields__
+        }
+
+
+class ChaptersListOrder(BaseSortOrder):
+    createdAt: Optional[SortOrder]
+    updatedAt: Optional[SortOrder]
+    publishAt: Optional[SortOrder]
+    volume: Optional[SortOrder]
+    chaptert: Optional[SortOrder]
