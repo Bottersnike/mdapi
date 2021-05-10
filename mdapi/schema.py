@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Literal
+from typing import Dict, List, Optional, Literal, Union
 from datetime import datetime
 from pydantic import BaseModel
 
@@ -106,6 +106,9 @@ class Type(BaseModel):
 
     def dict(self):
         return self.__root__.dict()
+
+
+TypeOrId = Union[Type, str]
 
 
 class Relationship(BaseModel):

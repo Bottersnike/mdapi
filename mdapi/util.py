@@ -1,13 +1,14 @@
 import base64
 import json
 import time
+from typing import Generic, Iterable, List, TypeVar
 
 from pydantic.main import BaseModel
 
-from .schema import Type
+from .schema import Type, TypeOrId
 
 
-def _type_id(type):
+def _type_id(type: TypeOrId):
     if isinstance(type, Type):
         return type.id
     if isinstance(type, BaseModel):
@@ -25,7 +26,10 @@ def _is_token_expired(jwt):
     return _get_token_expires(jwt) <= time.time()
 
 
-class PaginatedRequest:
+T = TypeVar("T")
+
+
+class PaginatedRequest(Generic[T]):
     _LIMIT = 100
 
     def __init__(self, api, *args, **kwargs):
@@ -41,7 +45,7 @@ class PaginatedRequest:
 
         self._ensure_populated()
 
-    def _get_next(self):
+    def _get_next(self) -> None:
         results = self._api._make_request(*self._args, **self._kwargs, params={
             **self._params,
             "offset": self.offset,
@@ -51,16 +55,16 @@ class PaginatedRequest:
         self.offset += results.get("limit", 0)
         self._results = results.get("results", [])
 
-    def __iter__(self):
+    def __iter__(self) -> Iterable[T]:
         return self
 
-    def _ensure_populated(self):
+    def _ensure_populated(self) -> None:
         if self._results is None or len(self._results) == 0:
             if self.total is not None and self.offset >= self.total:
                 raise StopIteration
             self._get_next()
 
-    def __next__(self):
+    def __next__(self) -> T:
         self._ensure_populated()
 
         if len(self._results) == 0:
@@ -70,7 +74,7 @@ class PaginatedRequest:
         result = result.get("data", result)
         return Type.parse_obj(result)
 
-    def next_page(self):
+    def next_page(self) -> List[T]:
         try:
             self._ensure_populated()
         except StopIteration:

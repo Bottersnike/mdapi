@@ -4,7 +4,20 @@ from .base import APIBase
 
 
 class AuthAPI(APIBase):
-    def login(self, username, password):
+    """
+    Actions related to Managdex authentication. The seperation between
+    these actions and :mod:`mdapi.api.account` are to remain in-line
+    with the structure of the upstream API. These actions generally
+    relate to the ``/account`` endpoints.
+    """
+
+    def login(self, username: str, password: str) -> None:
+        """
+        Login to a Mangadex account
+
+        :param username: Account's username
+        :param password: Account's password
+        """
         try:
             token = self.api._make_request(Endpoints.Auth.LOGIN, {
                 "username": username,
@@ -15,14 +28,26 @@ class AuthAPI(APIBase):
 
         self.api._authenticate(username, token)
 
-    def check(self):
+    def check(self) -> bool:
+        """
+        Check if a user is currently logged in
+
+        :returns: If a user is currently logged in
+        """
         return self.api._make_request(Endpoints.Auth.CHECK)
 
-    def logout(self):
+    def logout(self) -> None:
+        """
+        Logout the current user. If no user is logged in, this will
+        still make a logout request, but it will have no effect.
+        """
         self.api._make_request(Endpoints.Auth.LOGOUT)
         self.api._authenticate(None, None)
 
-    def refresh(self):
+    def refresh(self) -> None:
+        """
+        Refresh the current session token using the refresh token.
+        """
         ref = self.api._get_refresh_token()
         if ref is None:
             raise MdException("Not logged in")
