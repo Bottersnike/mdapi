@@ -1,3 +1,5 @@
+from pydantic.decorator import validate_arguments
+
 from ..endpoints import Endpoints
 from ..util import PaginatedRequest, _type_id
 from ..schema import TypeOrId, User, Type
@@ -5,26 +7,43 @@ from .base import APIBase
 
 
 class UserAPI(APIBase):
-    def get_list(self):
-        return PaginatedRequest(self.api, Endpoints.User.LIST)
+    @validate_arguments
+    def get_list(self, limit: int = 10, offset: int = 0):
+        return PaginatedRequest(
+            self.api, Endpoints.User.LIST, limit=limit, offset=offset
+        )
 
-    def get_list_for(self, user: TypeOrId[User]):
+    @validate_arguments
+    def get_list_for(
+        self, user: TypeOrId[User], limit: int = 10, offset: int = 0
+    ):
         return PaginatedRequest(
             self.api,
             Endpoints.User.OTHER_LIST,
             urlparams={
                 "user": _type_id(user)
-            }
+            },
+            limit=limit, offset=offset
         )
 
     def get_self(self) -> User:
         return Type.parse_obj(self.api._make_request(Endpoints.User.GET_ME))
 
-    def get_followed_groups(self):
-        return PaginatedRequest(self.api, Endpoints.User.FOLLOWS_GROUP)
+    @validate_arguments
+    def get_followed_groups(self, limit: int = 10, offset: int = 0):
+        return PaginatedRequest(
+            self.api, Endpoints.User.FOLLOWS_GROUP, limit=limit, offset=offset
+        )
 
-    def get_followed_chapters(self):
-        return PaginatedRequest(self.api, Endpoints.User.FOLLOWS_CHAPTERS)
+    @validate_arguments
+    def get_followed_chapters(self, limit: int = 10, offset: int = 0):
+        return PaginatedRequest(
+            self.api, Endpoints.User.FOLLOWS_CHAPTERS,
+            limit=limit, offset=offset
+        )
 
-    def get_followed_manga(self):
-        return PaginatedRequest(self.api, Endpoints.User.FOLLOWS_MANGA)
+    @validate_arguments
+    def get_followed_manga(self, limit: int = 10, offset: int = 0):
+        return PaginatedRequest(
+            self.api, Endpoints.User.FOLLOWS_MANGA, limit=limit, offset=offset
+        )

@@ -1,4 +1,4 @@
-from .main import main
+from .cli import main
 from .mdapi import MdAPI
 
 

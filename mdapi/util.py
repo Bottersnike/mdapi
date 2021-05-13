@@ -1,3 +1,4 @@
+from enum import Enum
 import functools
 import base64
 import json
@@ -6,7 +7,7 @@ from typing import Generic, Iterable, List, TypeVar
 
 from pydantic.main import BaseModel
 
-from .schema.models import Type
+from .schema import Type, UnsetValue
 
 
 def _type_id(type):
@@ -23,7 +24,7 @@ def _is_token_expired(jwt):
     return _get_token_expires(jwt) <= time.time()
 
 
-def is_actually(hoc):
+def shadows(hoc):
     def decorator(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
@@ -33,7 +34,7 @@ def is_actually(hoc):
     return decorator
 
 
-def params_to_query(kwargs, keep_null=False):
+def params_to_query(kwargs):
     query = {}
     for k, v in kwargs.items():
         if isinstance(v, BaseModel):
@@ -44,26 +45,45 @@ def params_to_query(kwargs, keep_null=False):
             for k2, v2 in v.items():
                 if isinstance(v2, (list, dict)):
                     raise ValueError("Deep structures not supported")
-                if v2 is not None or keep_null:
+                if isinstance(v2, Enum):
+                    query[f"{k}[{k2}]"] = v2.value
+                elif v2 is UnsetValue:
+                    query[f"{k}[{k2}]"] = None
+                elif v2 is not None:
                     query[f"{k}[{k2}]"] = v2
-        elif v is not None or keep_null:
+        elif isinstance(v, Enum):
+            query[k] = v.value
+        elif v is UnsetValue:
+            query[k] = None
+        elif v is not None:
             query[k] = v
     return query
+
+
+def strip_nulls(object):
+    return {
+        k: (None if v is UnsetValue else v)
+        for k, v in (object or {}).items()
+        if v is not None
+    }
 
 
 T = TypeVar("T")
 
 
 class PaginatedRequest(Generic[T]):
-    _LIMIT = 100
+    _LIMIT = 10
 
-    def __init__(self, api, *args, **kwargs):
+    def __init__(
+        self, api, *args, limit=None, offset=None, params=None, **kwargs
+    ):
         self.total = None
-        self.offset = kwargs.pop("offset", 0)
+        self.offset = offset if offset is not None else 0
+        self._limit = limit if limit is not None else self._LIMIT
+        self.has_more = True
 
         self._results = None
-        self._limit = kwargs.pop("limit", self._LIMIT)
-        self._params = kwargs.pop("params", {})
+        self._params = params or {}
         self._api = api
         self._args = args
         self._kwargs = kwargs
@@ -79,6 +99,7 @@ class PaginatedRequest(Generic[T]):
         self.total = results.get("total", 0)
         self.offset += results.get("limit", 0)
         self._results = results.get("results", [])
+        self.has_more = self.offset < self.total
 
     def __iter__(self) -> Iterable[T]:
         return self

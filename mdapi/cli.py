@@ -1,4 +1,6 @@
 import functools
+from mdapi.schema.const import SortOrder
+from mdapi.schema.search import ChapterSortOrder
 import os
 
 import click
@@ -84,6 +86,8 @@ def search(md: MdAPI, query):
             click.echo(click.style(i.id, fg="magenta"), nl=False)
             click.echo(" ", nl=False)
             click.echo(click.style(str(i.title), fg="bright_blue"))
+        if not results.has_more:
+            break
         if not click.confirm("Show more?"):
             break
 
@@ -93,7 +97,10 @@ def search(md: MdAPI, query):
 @click.argument("manga", nargs=1)
 @click.option("-l", "--locales", default="en")
 def chapters(md: MdAPI, manga, locales):
-    results = md.manga.get_chapters(manga, locales=locales)
+    results = md.manga.get_chapters(
+        manga, locales=locales.split(","),
+        order=ChapterSortOrder(chapter=SortOrder.desc)
+    )
     results._ensure_populated()
 
     click.echo(click.style(f" -=- {results.total} chapters -=-", fg="green"))
@@ -108,6 +115,8 @@ def chapters(md: MdAPI, manga, locales):
             if i.title:
                 click.echo(click.style(str(i.title), fg="blue"), nl=False)
             click.echo("")
+        if not results.has_more:
+            break
         if not click.confirm("Show more?"):
             break
 

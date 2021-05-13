@@ -12,14 +12,14 @@ class GroupAPI(APIBase):
     @validate_arguments
     def search(
         self,
-        name: Optional[str] = None,
+        name: str = None,
         ids: List[TypeOrId[ScanlationGroup]] = None,
         limit: int = 10,
         offset: int = 0,
     ):
         return PaginatedRequest(self.api, Endpoints.Group.SEARCH, params={
-            "limit": limit, "offset": offset, "name": name, "ids": ids
-        })
+            "name": name, "ids": ids
+        }, limit=limit, offset=offset)
 
     @validate_arguments
     def create(
@@ -57,7 +57,7 @@ class GroupAPI(APIBase):
                 "name": name,
                 "leader": leader,
                 "members": members,
-                "version": group.version + 1,
+                "version": group.version,
             }, urlparams={
                 "group": group.id
             }

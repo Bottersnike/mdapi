@@ -1,4 +1,4 @@
-from typing import Optional, Literal
+from typing import Optional, Literal, TypeVar, Union
 from enum import Enum
 
 from pydantic import conint
@@ -58,10 +58,29 @@ class SortOrder(Enum):
     desc = "desc"
 
 
-LinksKey = Literal[
-    "al", "ap", "bw", "cdj", "mu", "nu", "kt", "amz", "ebj", "mal",
-    "raw", "engtl", "dj"
-]
+class LinksKey(Enum):
+    anilist = "al"
+    animeplanet = "ap"
+    bookwalker = "bw"
+    cdJapan = "cdj"
+    mangaUpdates = "mu"
+    novelUpdates = "nu"
+    kitsu = "kt"
+    amazon = "amz"
+    ebookJapan = "ebj"
+    myAnimeList = "mal"
+    raw = "raw"
+    officialEn = "engtl"
+    doujinshi = "dj"
+
+
+class UnsetValue(type):
+    ...
+
+
+T = TypeVar("T")
+CanUnset = Union[T, UnsetValue]
+
 LanguageCode = Optional[Literal[
     "en", "pt-br", "ru", "fr", "es-la", "pl", "tr", "it", "es", "id", "vi",
     "hu", "zh", "ar", "de", "zh-hk", "ca", "th", "bg", "fa", "uk", "mn", "he",

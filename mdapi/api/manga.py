@@ -1,47 +1,69 @@
-from typing import Dict, List, Optional
+from mdapi.schema.search import ChapterSortOrder
+from typing import Dict, List
 from datetime import datetime
 
 from pydantic import validate_arguments
 
-from ..util import PaginatedRequest, is_actually
+from ..util import PaginatedRequest, shadows
 from ..endpoints import Endpoints
 from ..schema import (
     MultiMode, Status, LanguageCode, PublicationDemographic, Type, Tag, Year,
     ContentRating, TypeOrId, MangaSortOrder, ReadingStatus, Author, Manga,
-    LinksKey, Version, CustomList, LocalizedString
+    LinksKey, Version, CustomList, LocalizedString, CanUnset
 )
 from .base import APIBase
 
 
 class MangaAPI(APIBase):
-    def _search(self, **kwargs):
+    def _search(self, limit=None, offset=None, **kwargs):
         return PaginatedRequest(
-            self.api, Endpoints.Manga.SEARCH, params=kwargs
+            self.api, Endpoints.Manga.SEARCH, params=kwargs,
+            limit=limit, offset=offset,
         )
 
     @validate_arguments
-    @is_actually(_search)
+    @shadows(_search)
     def search(
         self,
-        title: Optional[str] = None,
-        authors: Optional[List[TypeOrId[Author]]] = None,
-        artists: Optional[List[TypeOrId]] = None,
-        year: Optional[Year] = None,
-        includedTags: Optional[List[TypeOrId[Tag]]] = None,
-        includedTagsMode: Optional[MultiMode] = None,
-        excludedTags: Optional[List[TypeOrId[Tag]]] = None,
-        excludedTagsMode: Optional[MultiMode] = None,
-        status: Optional[Status] = None,
-        originalLanguage: Optional[LanguageCode] = None,
-        publicationDemographic: Optional[PublicationDemographic] = None,
-        ids: Optional[List[TypeOrId[Manga]]] = None,
-        contentRating: Optional[ContentRating] = None,
-        createdAtSince: Optional[datetime] = None,
-        updatedAtSince: Optional[datetime] = None,
-        order: Optional[MangaSortOrder] = None,
+        title: str = None,
+        authors: List[TypeOrId[Author]] = None,
+        artists: List[TypeOrId] = None,
+        year: Year = None,
+        includedTags: List[TypeOrId[Tag]] = None,
+        includedTagsMode: MultiMode = None,
+        excludedTags: List[TypeOrId[Tag]] = None,
+        excludedTagsMode: MultiMode = None,
+        status: Status = None,
+        originalLanguage: LanguageCode = None,
+        publicationDemographic: PublicationDemographic = None,
+        ids: List[TypeOrId[Manga]] = None,
+        contentRating: ContentRating = None,
+        createdAtSince: datetime = None,
+        updatedAtSince: datetime = None,
+        order: MangaSortOrder = None,
         limit: int = 10,
         offset: int = 0,
     ):
+        """
+        :param title:
+        :param authors:
+        :param artists:
+        :param year:
+        :param includedTags:
+        :param includedTagsMode:
+        :param excludedTags:
+        :param excludedTagsMode:
+        :param status:
+        :param originalLanguage:
+        :param publicationDemographic:
+        :param ids:
+        :param contentRating:
+        :param createdAtSince:
+        :param updatedAtSince:
+        :param order:
+        :param limit:
+        :param offset:
+        """
         ...
 
     @validate_arguments
@@ -86,7 +108,7 @@ class MangaAPI(APIBase):
         return self.api._make_request(Endpoints.Manga.CREATE, kwargs)
 
     @validate_arguments
-    @is_actually(_create)
+    @shadows(_create)
     def create(
         self,
         title: LocalizedString,
@@ -97,24 +119,23 @@ class MangaAPI(APIBase):
         links: List[Dict[LinksKey, str]],
         originalLanguage: LanguageCode,
         year: Year,
-        lastVolume: Optional[str] = None,
-        lastChapter: Optional[str] = None,
-        publicationDemographic: Optional[PublicationDemographic] = None,
-        status: Optional[Status] = None,
-        contentRating: Optional[ContentRating] = None,
+        lastVolume: str = None,
+        lastChapter: str = None,
+        publicationDemographic: PublicationDemographic = None,
+        status: Status = None,
+        contentRating: ContentRating = None,
     ) -> Manga:
         ...
 
     def _edit(self, **kwargs):
-        manga = kwargs.pop("id")
+        manga = kwargs.pop("manga")
         return self.api._make_request(
             Endpoints.Manga.EDIT, kwargs,
-            urlparams={"manga": manga},
-            keep_null=True
+            urlparams={"manga": manga}
         )
 
     @validate_arguments
-    @is_actually(_edit)
+    @shadows(_edit)
     def edit(
         self,
         manga: TypeOrId[Manga],
@@ -127,27 +148,35 @@ class MangaAPI(APIBase):
         originalLanguage: LanguageCode,
         year: Year,
         version: Version,
-        lastVolume: Optional[str] = None,
-        lastChapter: Optional[str] = None,
-        publicationDemographic: Optional[PublicationDemographic] = None,
-        status: Optional[Status] = None,
-        contentRating: Optional[ContentRating] = None,
+        lastVolume: CanUnset[str] = None,
+        lastChapter: CanUnset[str] = None,
+        publicationDemographic: CanUnset[PublicationDemographic] = None,
+        status: CanUnset[Status] = None,
+        contentRating: CanUnset[ContentRating] = None,
     ) -> Manga:
         ...
 
+    def _get_chapters(self, limit=None, offset=None, **kwargs):
+        manga = kwargs.pop("manga")
+        return PaginatedRequest(
+            self.api, Endpoints.Manga.CHAPTERS, params=kwargs,
+            urlparams={"manga": manga}, limit=limit, offset=offset,
+        )
+
     @validate_arguments
+    @shadows(_get_chapters)
     def get_chapters(
         self,
         manga: TypeOrId[Manga],
-        locales: Optional[List[LanguageCode]] = None
+        locales: List[LanguageCode] = None,
+        createdAtSince: datetime = None,
+        updatedAtSince: datetime = None,
+        publishAtSince: datetime = None,
+        order: ChapterSortOrder = None,
+        limit: int = 10,
+        offset: int = 0,
     ) -> PaginatedRequest:
-        return PaginatedRequest(
-            self.api,
-            Endpoints.Manga.CHAPTERS,
-            limit=500,
-            urlparams={"manga": manga},
-            params={"locales": locales}
-        )
+        ...
 
     @validate_arguments
     def get_read(self, manga: TypeOrId[Manga]):

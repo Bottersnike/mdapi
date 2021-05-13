@@ -1,16 +1,18 @@
 import os
 from typing import BinaryIO, Generator, List, Tuple
+from datetime import datetime
 
+from pydantic.decorator import validate_arguments
 import requests
 
-from ..util import PaginatedRequest, _type_id
+from ..util import PaginatedRequest, shadows
 from ..endpoints import Endpoints
 from ..exceptions import (
     DownloadException, NoFollowRedirect, InvalidStatusCode, InvalidFileLength
 )
 from ..schema import (
-    ChaptersListOrder, LanguageCode, Type, Manga, TypeOrId, Chapter,
-    ScanlationGroup, User
+    ChapterSortOrder, LanguageCode, Type, Manga, TypeOrId, Chapter,
+    ScanlationGroup, User, CanUnset
 )
 from .base import APIBase
 
@@ -21,52 +23,52 @@ class ChapterAPI(APIBase):
     to the ``/chapter`` endpoints.
     """
 
+    def _search(self, limit=None, offset=None, **kwargs):
+        return PaginatedRequest(
+            self.api, Endpoints.Chapter.SEARCH, params=kwargs,
+            limit=limit, offset=offset,
+        )
+
+    @validate_arguments
+    @shadows(_search)
     def search(
         self,
-        manga: TypeOrId[Manga] = None,
-        limit: int = 10, offset: int = 0,
+        title: str = None,
+        ids: List[TypeOrId[Chapter]] = None,
+        groups: List[TypeOrId[ScanlationGroup]] = None,
         uploader: TypeOrId[User] = None,
+        manga: TypeOrId[Manga] = None,
         volume: str = None,
         chapter: str = None,
-        translated_language: List[LanguageCode] = None,
-        ids: List[TypeOrId[Manga]] = None,
-        groups: List[TypeOrId[ScanlationGroup]] = None,
-        created_at_since: str = None,
-        updated_at_since: str = None,
-        publish_at_since: str = None,
-        order: ChaptersListOrder = None,
+        translatedLanguage: LanguageCode = None,
+        createdAtSince: datetime = None,
+        updatedAtSince: datetime = None,
+        publishAtSince: datetime = None,
+        order: ChapterSortOrder = None,
+        limit: int = 10,
+        offset: int = 0,
     ):
         """
         Search for a manga.
 
-        :param manga: Manga to request chapters from
-        :param uploader: The chapter's uploader
-        :param volume: The volume this chapter is in
-        :param chapter: The chapter number
-        :param translated_language: The language this was translated into
+        :param title: The chapter title to search
         :param ids: A whitelist of chapter IDs to search
         :param groups: A whitelist of groups to search chapters from
-        :param created_at_since: Only show chapters created after this time
-        :param updated_at_since: Only show chapters updated after this time
-        :param publish_at_since: Only show chapters publisged after this time
+        :param uploader: The chapter's uploader
+        :param manga: Manga to request chapters from
+        :param volume: The volume this chapter is in
+        :param chapter: The chapter number
+        :param translatedLanguage: The language this was translated into
+        :param createdAtSince: Only show chapters created after this time
+        :param updatedAtSince: Only show chapters updated after this time
+        :param publishAtSince: Only show chapters publisged after this time
         :param order: The search order
         :param limit: The number of results per page
         :param offset: The offset to start from
         """
+        ...
 
-        return PaginatedRequest(self.api, Endpoints.Chapter.SEARCH, params={
-            "limit": limit, "offset": offset,
-            "uploader": _type_id(uploader),
-            "manga": _type_id(manga), "volume": volume, "chapter": chapter,
-            "translatedLanguage": translated_language,
-            "ids": [_type_id(i) for i in ids or []] or None,
-            "groups": [_type_id(i) for i in groups or []] or None,
-            "createdAtSince": created_at_since,
-            "updatedAtSince": updated_at_since,
-            "publishAtSince": publish_at_since,
-            **(order.serialize() if order else {})
-        })
-
+    @validate_arguments
     def get(self, chapter: TypeOrId[Chapter]) -> Chapter:
         """
         Request full details for an chapter. This notably includes image
@@ -79,18 +81,26 @@ class ChapterAPI(APIBase):
         """
         return Type.parse_obj(self.api._make_request(
             Endpoints.Chapter.GET,
-            urlparams={"chapter": _type_id(chapter)}
+            urlparams={"chapter": chapter}
         ))
 
+    def _edit(self, **kwargs):
+        chapter = kwargs.pop("chapter")
+        kwargs["chapter"] = kwargs.pop("chapterNumber")
+        return self.api._make_request(
+            Endpoints.Chapter.EDIT, kwargs,
+            urlparams={"chapter": chapter}
+        )
+
+    @validate_arguments
+    @shadows(_edit)
     def edit(
         self,
         chapter: Chapter,
         title: str,
-        data: List[str],
-        data_saver: List[str],
-        volume: str = None,
-        chapter_number: str = None,
-        translated_language: LanguageCode = None,
+        volume: CanUnset[str] = None,
+        chapterNumber: CanUnset[str] = None,
+        translatedLanguage: CanUnset[LanguageCode] = None,
     ) -> Chapter:
         """
         Exit a chapter. This notably includes image
@@ -100,27 +110,13 @@ class ChapterAPI(APIBase):
             conflict resolution, a `mdapi.schema.Chapter` object is
             required rather than optional.
         :param title: The new title for the chapter
-        :param data: The new array of page URLs
-        :param data_saver: The new array of data-saver page URLs
         :param volume: The new volume number
-        :param chapter_number: The new chapter number
-        :param translated_language: This chapter's translated language
+        :param chapterNumber: The new chapter number
+        :param translatedLanguage: This chapter's translated language
         """
-        Type.parse_obj(self.api._make_request(
-            Endpoints.Chapter.EDIT,
-            urlparams={
-                "chapter": chapter.id
-            }, body={
-                "title": title,
-                "data": data,
-                "data_saver": data_saver,
-                "volume": volume,
-                "chapter": chapter_number,
-                "translatedLanguage": translated_language,
-                "version": chapter.version
-            }
-        ))
+        ...
 
+    @validate_arguments
     def delete(self, chapter: TypeOrId[Chapter]) -> None:
         """
         Delete a chapter.
@@ -129,9 +125,10 @@ class ChapterAPI(APIBase):
             `mdapi.schema.Chapter` object, or its UUID.
         """
         self.api._make_request(Endpoints.Chapter.DELETE, urlparams={
-            "chapter": _type_id(chapter)
+            "chapter": chapter
         })
 
+    @validate_arguments
     def mark_read(self, chapter: TypeOrId[Chapter]) -> None:
         """
         Mark a chapter as read.
@@ -140,9 +137,10 @@ class ChapterAPI(APIBase):
             `mdapi.schema.Chapter` object, or its UUID.
         """
         self.api._make_request(Endpoints.Chapter.MARK_READ, urlparams={
-            "chapter": _type_id(chapter)
+            "chapter": chapter
         })
 
+    @validate_arguments
     def mark_unread(self, chapter: TypeOrId[Chapter]) -> None:
         """
         Mark a chapter as unread.
@@ -151,9 +149,10 @@ class ChapterAPI(APIBase):
             `mdapi.schema.Chapter` object, or its UUID.
         """
         self.api._make_request(Endpoints.Chapter.MARK_UNREAD, urlparams={
-            "chapter": _type_id(chapter)
+            "chapter": chapter
         })
 
+    @validate_arguments
     def page_urls_for(
         self, chapter: Chapter, data_saver: bool = False
     ) -> Generator[str, None, None]:
@@ -183,6 +182,7 @@ class ChapterAPI(APIBase):
         for i in chapter.dataSaver if data_saver else chapter.data:
             yield base + i
 
+    @validate_arguments
     def download_page(
         self, url: str, follow_redirect: bool = False, report_mdah: bool = True
     ) -> Generator[Tuple[bytes, int], None, None]:

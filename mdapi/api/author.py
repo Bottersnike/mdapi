@@ -1,6 +1,10 @@
-from ..util import PaginatedRequest, _type_id
+from typing import List
+
+from pydantic.decorator import validate_arguments
+
+from ..util import PaginatedRequest
 from ..endpoints import Endpoints
-from ..schema import Author, Type, TypeOrId
+from ..schema import Author, Type, TypeOrId, CanUnset
 from .base import APIBase
 
 
@@ -10,6 +14,7 @@ class AuthorAPI(APIBase):
     ``/author`` endpoints.
     """
 
+    @validate_arguments
     def create(self, name: str) -> Author:
         """
         Create a new author.
@@ -23,6 +28,7 @@ class AuthorAPI(APIBase):
             body={"name": name}
         ))
 
+    @validate_arguments
     def get(self, author: TypeOrId[Author]) -> Author:
         """
         Request full details for an author.
@@ -34,27 +40,34 @@ class AuthorAPI(APIBase):
         """
         return Type.parse_obj(self.api._make_request(
             Endpoints.Author.GET,
-            urlparams={"author": _type_id(author)}
+            urlparams={"author": author}
         ))
 
+    @validate_arguments
     def search(
-        self, limit: int = 10, offset: int = 0, name: str = None
+        self,
+        name: str = None,
+        ids: List[TypeOrId[Author]] = None,
+        limit: int = 10,
+        offset: int = 0,
     ) -> PaginatedRequest[Author]:
         """
         Search for an author by name.
 
         :param name: The name to search with
+        :param ids: Whitelist of authors to search from
         :param limit: The number of results per page
         :param offset: The offset to start from
 
         :returns: Paginated search results
         """
         return PaginatedRequest(self.api, Endpoints.Author.SEARCH, params={
-            "limit": limit, "offset": offset, "name": name
-        })
+            "name": name, "ids": ids
+        }, limit=limit, offset=offset)
 
+    @validate_arguments
     def edit(
-        self, author: TypeOrId[Author], name: str = None
+        self, author: TypeOrId[Author], name: CanUnset[str] = None
     ) -> None:
         """
         Make edits to a user. Currently only changing the author name is
@@ -72,6 +85,7 @@ class AuthorAPI(APIBase):
             Endpoints.Author.EDIT, body=body, urlparams={"author": author.id}
         )
 
+    @validate_arguments
     def delete(self, author: TypeOrId[Author]) -> None:
         """
         Delete an author.
@@ -80,5 +94,5 @@ class AuthorAPI(APIBase):
             `mdapi.schema.Author` object, or their UUID.
         """
         self.api._make_request(
-            Endpoints.Author.delete, urlparams={"author": _type_id(author)}
+            Endpoints.Author.delete, urlparams={"author": author}
         )

@@ -1,5 +1,5 @@
 from ..endpoints import Endpoints
-from ..schema.models import User
+from ..schema import Type, User
 from .base import APIBase
 
 
@@ -19,7 +19,7 @@ class AccountAPI(APIBase):
 
         :returns: The newly created user
         """
-        return KeyedUnion.parse_obj(self.api._make_request(
+        return Type.parse_obj(self.api._make_request(
             Endpoints.Account.CREATE, body={
                 "username": username,
                 "password": password,

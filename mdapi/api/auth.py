@@ -1,3 +1,5 @@
+from pydantic.decorator import validate_arguments
+
 from ..endpoints import Endpoints
 from ..exceptions import MdException
 from .base import APIBase
@@ -11,6 +13,7 @@ class AuthAPI(APIBase):
     relate to the ``/account`` endpoints.
     """
 
+    @validate_arguments
     def login(self, username: str, password: str) -> None:
         """
         Login to a Mangadex account

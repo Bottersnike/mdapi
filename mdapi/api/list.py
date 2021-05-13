@@ -39,7 +39,7 @@ class ListAPI(APIBase):
                 "name": name,
                 "visibility": visibility,
                 "manga": manga,
-                "version": custom_list.version + 1,
+                "version": custom_list.version,
             }, urlparams={"list": custom_list.id}
         )
 
@@ -60,9 +60,15 @@ class ListAPI(APIBase):
         )
 
     @validate_arguments
-    def get_feed(self, list_id: TypeError[CustomList]):
+    def get_feed(
+        self,
+        list_id: TypeOrId[CustomList],
+        limit: int = 10,
+        offset: int = 0,
+    ):
         return PaginatedRequest(
             self.api,
             Endpoints.List.GET_FEED,
-            urlparams={"list": list_id}
+            urlparams={"list": list_id},
+            limit=limit, offset=offset
         )

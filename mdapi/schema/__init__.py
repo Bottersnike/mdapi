@@ -5,13 +5,13 @@ from .models import (
 from .const import (
     PublicationDemographic, Status, ContentRating, ReadingStatus,
     CustomListVisibility, LinksKey, LanguageCode, SortOrder, Version,
-    MultiMode, LegacyType
+    MultiMode, LegacyType, Year, UnsetValue, CanUnset
 )
 from .search import (
-    MangaSortOrder, MangaSearch, ChaptersListOrder
+    MangaSortOrder, ChapterSortOrder
 )
 from .util import (
-    TypeOrId
+    TypeOrId, LocalizedString
 )
 
 __all__ = (
@@ -20,9 +20,9 @@ __all__ = (
 
     "PublicationDemographic", "Status", "ContentRating", "ReadingStatus",
     "CustomListVisibility", "LinksKey", "LanguageCode", "SortOrder", "Version",
-    "MultiMode", "LegacyType",
+    "MultiMode", "LegacyType", "Year", "UnsetValue", "CanUnset",
 
-    "MangaSortOrder", "MangaSearch", "ChaptersListOrder",
+    "MangaSortOrder", "ChapterSortOrder",
 
-    "TypeOrId",
+    "TypeOrId", "LocalizedString",
 )
