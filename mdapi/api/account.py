@@ -19,7 +19,7 @@ class AccountAPI(APIBase):
 
         :returns: The newly created user
         """
-        return Type.parse_obj(self.api._make_request(
+        return KeyedUnion.parse_obj(self.api._make_request(
             Endpoints.Account.CREATE, body={
                 "username": username,
                 "password": password,
