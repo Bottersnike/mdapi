@@ -12,7 +12,7 @@ from .api import (
     AccountAPI, AuthAPI, AuthorAPI, ChapterAPI, GroupAPI, ListAPI, MangaAPI,
     MiscAPI, UserAPI
 )
-from .util import _is_token_expired
+from .util import _is_token_expired, params_to_query
 from .endpoints import Endpoints
 
 
@@ -77,7 +77,11 @@ class APIHandler:
         headers["User-Agent"] = self.UA
         return headers
 
-    def _make_request(self, action, body=None, params=None, urlparams=None):
+    def _make_request(
+        self, action, body=None, params=None, urlparams=None, keep_null=False
+    ):
+        if params is not None:
+            params = params_to_query(params, keep_null=keep_null)
         if action != Endpoints.Auth.REFRESH:
             self._check_expired()
 
@@ -89,7 +93,11 @@ class APIHandler:
         req = requests.request(
             action[0], url,
             json=body,
-            params={k: v for k, v in (params or {}).items() if v is not None},
+            params={
+                k: v
+                for k, v in (params or {}).items()
+                if v is not None or keep_null
+            },
             headers=self._get_headers()
         )
         if self.DEBUG:

@@ -1,5 +1,5 @@
 from ..endpoints import Endpoints
-from ..schema import Type, User
+from ..schema.models import User
 from .base import APIBase
 
 

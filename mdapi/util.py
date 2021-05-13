@@ -1,3 +1,4 @@
+import functools
 import base64
 import json
 import time
@@ -5,15 +6,11 @@ from typing import Generic, Iterable, List, TypeVar
 
 from pydantic.main import BaseModel
 
-from .schema import Type, TypeOrId
+from .schema.models import Type
 
 
-def _type_id(type: TypeOrId):
-    if isinstance(type, Type):
-        return type.id
-    if isinstance(type, BaseModel):
-        return type.id
-    return type
+def _type_id(type):
+    raise NotImplementedError
 
 
 def _get_token_expires(jwt):
@@ -24,6 +21,34 @@ def _get_token_expires(jwt):
 
 def _is_token_expired(jwt):
     return _get_token_expires(jwt) <= time.time()
+
+
+def is_actually(hoc):
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            kwargs.update(zip(func.__code__.co_varnames, args))
+            return hoc(**kwargs)
+        return wrapper
+    return decorator
+
+
+def params_to_query(kwargs, keep_null=False):
+    query = {}
+    for k, v in kwargs.items():
+        if isinstance(v, BaseModel):
+            v = v.dict()
+        if isinstance(v, list):
+            query[f"{k}[]"] = v
+        elif isinstance(v, dict):
+            for k2, v2 in v.items():
+                if isinstance(v2, (list, dict)):
+                    raise ValueError("Deep structures not supported")
+                if v2 is not None or keep_null:
+                    query[f"{k}[{k2}]"] = v2
+        elif v is not None or keep_null:
+            query[k] = v
+    return query
 
 
 T = TypeVar("T")

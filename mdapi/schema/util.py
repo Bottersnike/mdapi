@@ -2,7 +2,7 @@ from types import FunctionType
 from typing import Generator, List, Tuple
 from pydantic import BaseModel
 
-from .schema_enum import LanguageCode
+from .const import LanguageCode
 
 
 class LocalizedString(dict):
@@ -50,8 +50,8 @@ class Keyed:
     def __init__(self, item):
         self.item = item
 
-    def __get_validators__(cls):
-        yield cls.return_type
+    def __get_validators__(self):
+        yield self.return_type
 
     def return_type(self, values):
         subclasses = self.item.__subclasses__()
@@ -94,3 +94,42 @@ class KeyedUnion:
                 return self.__root__.dict()
 
         return KeyedUnion
+
+
+class TypeOrId:
+    _type = None
+
+    def __class_getitem__(cls, item):
+        class StrictTypeOrId(TypeOrId):
+            _type = item
+        return StrictTypeOrId
+
+    @classmethod
+    def __get_validators__(cls):
+        yield cls.return_type
+
+    @classmethod
+    def return_type(self, value):
+        from .models import Relationship, Type
+        from uuid import UUID
+
+        if isinstance(value, str):
+            try:
+                UUID(value)
+            except ValueError:
+                raise
+            else:
+                return value
+
+        if isinstance(value, (Type, BaseModel)):
+            if self._type is not None:
+                got_type = (
+                    value.type if isinstance(value, Relationship)
+                    else value._type
+                )
+                exp_type = self._type._type
+                if exp_type != got_type:
+                    raise ValueError(f"Expected {exp_type}, got {got_type}")
+            return value.id
+
+        raise TypeError("UUID or type required")

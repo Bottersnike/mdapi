@@ -1,63 +1,82 @@
-from ..util import PaginatedRequest, _type_id
+from typing import List, Optional
+
+from pydantic.decorator import validate_arguments
+
+from ..util import PaginatedRequest
 from ..endpoints import Endpoints
-from ..schema import Type
+from ..schema import Type, TypeOrId, User, ScanlationGroup
 from .base import APIBase
 
 
 class GroupAPI(APIBase):
-    def search(self, limit=10, offset=0, name=None):
+    @validate_arguments
+    def search(
+        self,
+        name: Optional[str] = None,
+        ids: List[TypeOrId[ScanlationGroup]] = None,
+        limit: int = 10,
+        offset: int = 0,
+    ):
         return PaginatedRequest(self.api, Endpoints.Group.SEARCH, params={
-            "limit": limit, "offset": offset, "name": name
+            "limit": limit, "offset": offset, "name": name, "ids": ids
         })
 
-    def create(self, name, leader, members):
+    @validate_arguments
+    def create(
+        self,
+        name: str,
+        leader: TypeOrId[User],
+        members: List[TypeOrId[User]]
+    ) -> ScanlationGroup:
         return Type.parse_obj(self.api._make_request(
             Endpoints.Group.CREATE, body={
                 "name": name,
-                "leader": _type_id(leader),
-                "members": [_type_id(i) for i in members]
+                "leader": leader,
+                "members": members,
             }
         ))
 
-    def get(self, group):
+    @validate_arguments
+    def get(self, group: TypeOrId[ScanlationGroup]) -> ScanlationGroup:
         return Type.parse_obj(self.api._make_request(
             Endpoints.Group.GET, urlparams={
-                "group": _type_id(group)
+                "group": group
             }
         ))
 
-    def edit(self, group, name=None, leader=None, members=None):
-        body = {"version": group.version}
-        if name is not None:
-            body["name"] = name
-        if leader is not None:
-            body["leader"] = _type_id(leader)
-        if members is not None:
-            body["members"] = [_type_id(i) for i in members]
-
+    @validate_arguments
+    def edit(
+        self,
+        group: ScanlationGroup,
+        name: str,
+        leader: TypeOrId[User],
+        members: List[TypeOrId[User]]
+    ) -> ScanlationGroup:
         return Type.parse_obj(self.api._make_request(
-            Endpoints.Group.EDIT, body=body, urlparams={
+            Endpoints.Group.EDIT, body={
+                "name": name,
+                "leader": leader,
+                "members": members,
+                "version": group.version + 1,
+            }, urlparams={
                 "group": group.id
             }
         ))
 
-    def delete(self, group):
+    @validate_arguments
+    def delete(self, group: TypeOrId[ScanlationGroup]):
         self.api._make_request(
-            Endpoints.Group.DELETE, urlparams={
-                "group": _type_id(group)
-            }
+            Endpoints.Group.DELETE, urlparams={"group": group}
         )
 
-    def follow(self, group):
+    @validate_arguments
+    def follow(self, group: TypeOrId[ScanlationGroup]):
         self.api._make_request(
-            Endpoints.Group.FOLLOW, urlparams={
-                "group": _type_id(group)
-            }
+            Endpoints.Group.FOLLOW, urlparams={"group": group}
         )
 
-    def unfollow(self, group):
+    @validate_arguments
+    def unfollow(self, group: TypeOrId[ScanlationGroup]):
         self.api._make_request(
-            Endpoints.Group.UNFOLLOW, urlparams={
-                "group": _type_id(group)
-            }
+            Endpoints.Group.UNFOLLOW, urlparams={"group": group}
         )

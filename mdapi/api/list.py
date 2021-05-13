@@ -1,51 +1,68 @@
-from ..util import PaginatedRequest, _type_id
+from typing import List
+
+from pydantic import validate_arguments
+
+from ..util import PaginatedRequest
 from ..endpoints import Endpoints
-from ..schema import Type
+from ..schema import TypeOrId, Type, CustomListVisibility, Manga, CustomList
 from .base import APIBase
 
 
 class ListAPI(APIBase):
-    def create(self, name, visibility, manga):
+    @validate_arguments
+    def create(
+        self,
+        name: str,
+        visibility: CustomListVisibility,
+        manga: List[TypeOrId[Manga]]
+    ) -> CustomList:
         return Type.parse_obj(self.api._make_request(
             Endpoints.List.CREATE,
             body={
                 "name": name,
                 "visibility": visibility,
-                "manga": [_type_id(i) for i in manga]
+                "manga": manga,
+                "version": 1,
             }
         ))
 
-    def edit(self, list, name=None, visibility=None, manga=None):
-        body = {"version": list}
-        if name is not None:
-            body["name"] = name
-        if visibility is not None:
-            body["visibility"] = visibility
-        if manga is not None:
-            body["manga"] = [_type_id(i) for i in manga]
-
+    @validate_arguments
+    def edit(
+        self,
+        custom_list: CustomList,
+        name: str,
+        visibility: CustomListVisibility,
+        manga: List[TypeOrId[Manga]]
+    ):
         self.api._make_request(
-            Endpoints.List.EDIT, body=body, urlparams={"list": list.id}
+            Endpoints.List.EDIT, body={
+                "name": name,
+                "visibility": visibility,
+                "manga": manga,
+                "version": custom_list.version + 1,
+            }, urlparams={"list": custom_list.id}
         )
 
-    def get(self, list):
+    @validate_arguments
+    def get(self, list_id: TypeOrId[CustomList]) -> CustomList:
         return Type.parse_obj(self.api._make_request(
             Endpoints.List.GET, urlparams={
-                "list": _type_id(list)
+                "list": list_id
             }
         ))
 
-    def delete(self, list):
+    @validate_arguments
+    def delete(self, list_id: TypeOrId[CustomList]) -> None:
         self.api._make_request(
             Endpoints.List.DELETE, urlparams={
-                "list": _type_id(list)
+                "list": list_id
             }
         )
 
-    def get_feed(self, list):
+    @validate_arguments
+    def get_feed(self, list_id: TypeError[CustomList]):
         return PaginatedRequest(
             self.api,
-            Endpoints.List.GET_FEED, urlparams={
-                "list": _type_id(list)
-            }
+            Endpoints.List.GET_FEED,
+            urlparams={"list": list_id}
         )

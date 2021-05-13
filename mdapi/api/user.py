@@ -1,6 +1,6 @@
 from ..endpoints import Endpoints
 from ..util import PaginatedRequest, _type_id
-from ..schema import Type
+from ..schema import TypeOrId, User, Type
 from .base import APIBase
 
 
@@ -8,7 +8,7 @@ class UserAPI(APIBase):
     def get_list(self):
         return PaginatedRequest(self.api, Endpoints.User.LIST)
 
-    def get_list_for(self, user):
+    def get_list_for(self, user: TypeOrId[User]):
         return PaginatedRequest(
             self.api,
             Endpoints.User.OTHER_LIST,
@@ -17,7 +17,7 @@ class UserAPI(APIBase):
             }
         )
 
-    def get_self(self):
+    def get_self(self) -> User:
         return Type.parse_obj(self.api._make_request(Endpoints.User.GET_ME))
 
     def get_followed_groups(self):

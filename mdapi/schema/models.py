@@ -1,19 +1,13 @@
-from typing import Dict, List, Optional, TypeVar, Union
+from typing import Dict, List, Optional
 from datetime import datetime
 from pydantic import BaseModel, constr
 from uuid import UUID
 
-from .schema_util import LocalizedString, KeyedUnion
-from .schema_enum import (
+from .util import LocalizedString, KeyedUnion
+from .const import (
     LanguageCode, LinksKey, PublicationDemographic, Status, ContentRating,
-    ReadingStatus, CustomListVisibility, SortOrder, Version
+    ReadingStatus, CustomListVisibility, Version, Year, LegacyType
 )
-
-
-T = TypeVar("T")
-
-
-TypeOrId = Union[T, str]
 
 
 class Relationship(BaseModel):
@@ -51,7 +45,7 @@ class Manga(BaseType):
     altTitles: List[LocalizedString]
     description: LocalizedString
     isLocked: bool
-    originalLanguage: str
+    originalLanguage: LanguageCode
     tags: List[Type]
 
     lastVolume: Optional[str]
@@ -59,7 +53,7 @@ class Manga(BaseType):
     links: Optional[Dict[LinksKey, str]]
     publicationDemographic: Optional[PublicationDemographic]
     status: Optional[Status]
-    year: Optional[int]
+    year: Optional[Year]
     contentRating: Optional[ContentRating]
     readingStatus: Optional[ReadingStatus]
 
@@ -105,7 +99,7 @@ class CustomList(BaseType):
 class MappingID(BaseType):
     _type = "mapping_id"
 
-    type: str
+    type: LegacyType
     legacyId: int
     newId: str
 
@@ -118,19 +112,3 @@ class Author(BaseType):
     imageUrl: Optional[str]
     createdAt: datetime
     updatedAt: datetime
-
-
-class BaseSortOrder(BaseModel):
-    def serialize(self):
-        return {
-            f"order[{i}]": getattr(self, i, None)
-            for i in self.__fields__
-        }
-
-
-class ChaptersListOrder(BaseSortOrder):
-    createdAt: Optional[SortOrder]
-    updatedAt: Optional[SortOrder]
-    publishAt: Optional[SortOrder]
-    volume: Optional[SortOrder]
-    chaptert: Optional[SortOrder]

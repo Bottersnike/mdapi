@@ -41,6 +41,23 @@ class CustomListVisibility(Enum):
     private = "private"
 
 
+class MultiMode(Enum):
+    AND = "AND"
+    OR = "OR"
+
+
+class LegacyType(Enum):
+    group = "group"
+    manga = "manga"
+    chapter = "chapter"
+    tag = "tag"
+
+
+class SortOrder(Enum):
+    asc = "asc"
+    desc = "desc"
+
+
 LinksKey = Literal[
     "al", "ap", "bw", "cdj", "mu", "nu", "kt", "amz", "ebj", "mal",
     "raw", "engtl", "dj"
@@ -51,6 +68,6 @@ LanguageCode = Optional[Literal[
     "ro", "ms", "tl", "ja", "ko", "hi", "my", "cs", "pt", "nl", "sv", "bn",
     "no", "lt", "el", "sr", "da", "fi",
 ]]
-SortOrder = Literal["asc", "desc"]
 
 Version = Optional[conint(ge=1)]
+Year = conint(ge=1, le=9999)
