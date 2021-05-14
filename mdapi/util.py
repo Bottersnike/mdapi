@@ -62,7 +62,7 @@ def params_to_query(kwargs):
 
 def strip_nulls(object):
     return {
-        k: (None if v is UnsetValue else v)
+        k: (None if v is UnsetValue else v.value if isinstance(v, Enum) else v)
         for k, v in (object or {}).items()
         if v is not None
     }
