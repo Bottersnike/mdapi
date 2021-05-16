@@ -1,3 +1,4 @@
+from uuid import UUID
 from mdapi.schema.search import ChapterSortOrder
 from typing import Dict, List
 from datetime import datetime
@@ -99,6 +100,14 @@ class MangaAPI(APIBase):
             Type.parse_obj(i.get("data"))
             for i in self.api._make_request(Endpoints.Manga.TAGS)
         ]
+
+    @validate_arguments
+    def get_batch_read(self, ids: List[TypeOrId[Manga]]) -> List[UUID]:
+        if len(ids) == 0:
+            return []
+        return self.api._make_request(Endpoints.Manga.BATCH_GET_READ, params={
+            "ids": ids
+        })
 
     def random(self) -> Manga:
         return Type.parse_obj(self.api._make_request(Endpoints.Manga.RANDOM))

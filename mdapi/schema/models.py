@@ -35,7 +35,8 @@ class Tag(BaseType):
     _type = "tag"
 
     name: LocalizedString
-    # restricted: Optional[bool]
+    description: List[LocalizedString]
+    group: Optional[UUID]
 
 
 class Manga(BaseType):
@@ -59,6 +60,10 @@ class Manga(BaseType):
 
     createdAt: datetime
     updatedAt: datetime
+
+    @property
+    def tag_names(self):
+        return [i.name for i in self.tags]
 
 
 class Chapter(BaseType):

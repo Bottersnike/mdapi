@@ -3,6 +3,7 @@ class Endpoints:
         SEARCH = ("GET", "/manga")
         CREATE = ("POST", "/manga")
         TAGS = ("GET", "/manga/tag")
+        BATCH_GET_READ = ("GET", "/manga/read")
         RANDOM = ("GET", "/manga/random")
         GET = ("GET", "/manga/{manga}")
         EDIT = ("PUT", "/manga/{manga}")
