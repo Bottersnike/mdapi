@@ -4,7 +4,7 @@ from pydantic.decorator import validate_arguments
 
 from ..util import PaginatedRequest
 from ..endpoints import Endpoints
-from ..schema import Author, Type, TypeOrId, CanUnset
+from ..schema import Author, Type, TypeOrId, CanUnset, AuthorSortOrder
 from .base import APIBase
 
 
@@ -48,6 +48,7 @@ class AuthorAPI(APIBase):
         self,
         name: str = None,
         ids: List[TypeOrId[Author]] = None,
+        order: AuthorSortOrder = None,
         limit: int = 10,
         offset: int = 0,
     ) -> PaginatedRequest[Author]:
@@ -56,13 +57,14 @@ class AuthorAPI(APIBase):
 
         :param name: The name to search with
         :param ids: Whitelist of authors to search from
+        :param order: The order to sort results
         :param limit: The number of results per page
         :param offset: The offset to start from
 
         :returns: Paginated search results
         """
         return PaginatedRequest(self.api, Endpoints.Author.SEARCH, params={
-            "name": name, "ids": ids
+            "name": name, "ids": ids, "order": order
         }, limit=limit, offset=offset)
 
     @validate_arguments

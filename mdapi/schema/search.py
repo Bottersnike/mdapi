@@ -18,6 +18,10 @@ class BaseSortOrder(BaseModel):
         }
 
 
+class AuthorSortOrder(BaseSortOrder):
+    name: Optional[SortOrder]
+
+
 class MangaSortOrder(BaseSortOrder):
     createdAt: Optional[SortOrder]
     updatedAt: Optional[SortOrder]

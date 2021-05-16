@@ -8,7 +8,7 @@ from .const import (
     MultiMode, LegacyType, Year, UnsetValue, CanUnset
 )
 from .search import (
-    MangaSortOrder, ChapterSortOrder
+    AuthorSortOrder, MangaSortOrder, ChapterSortOrder
 )
 from .util import (
     TypeOrId, LocalizedString
@@ -22,7 +22,7 @@ __all__ = (
     "CustomListVisibility", "LinksKey", "LanguageCode", "SortOrder", "Version",
     "MultiMode", "LegacyType", "Year", "UnsetValue", "CanUnset",
 
-    "MangaSortOrder", "ChapterSortOrder",
+    "AuthorSortOrder", "MangaSortOrder", "ChapterSortOrder",
 
     "TypeOrId", "LocalizedString",
 )
