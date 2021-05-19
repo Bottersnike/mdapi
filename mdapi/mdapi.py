@@ -29,6 +29,8 @@ class APIHandler:
         self.user = None
         self._auth = None
 
+        self.captcha = None
+
     def _save_auth(self):
         with open(self.AUTH_FILE, "w") as auth_file:
             json.dump({
@@ -70,14 +72,16 @@ class APIHandler:
                 else:
                     raise RefreshTokenFailed()
 
-    def _get_headers(self):
+    def _get_headers(self, auth: bool = True) -> dict:
         headers = {}
-        if self._auth is not None:
+        if auth and self._auth is not None:
             headers["Authorization"] = "Bearer " + self._auth.get("session")
+        if self.captcha is not None:
+            headers["X-Captcha-Result"] = self.captcha
         headers["User-Agent"] = self.UA
         return headers
 
-    def _make_request(self, action, body=None, params=None, urlparams=None):
+    def _make_request(self, action, body=None, params=None, urlparams=None, auth=True):
         if params is not None:
             params = params_to_query(params)
         if action != Endpoints.Auth.REFRESH:
@@ -92,7 +96,7 @@ class APIHandler:
             action[0], url,
             json=None if action[0] == "GET" else strip_nulls(body),
             params=strip_nulls(params),
-            headers=self._get_headers()
+            headers=self._get_headers(auth)
         )
         if self.DEBUG:
             click.echo(click.style(f" -> {action[0]} {req.url}", fg="yellow"))

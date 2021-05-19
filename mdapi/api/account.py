@@ -25,7 +25,7 @@ class AccountAPI(APIBase):
                 "password": password,
                 "email": email
             }
-        ))
+        ), auth=False)
 
     def recover(self, email: str) -> None:
         """
@@ -36,7 +36,7 @@ class AccountAPI(APIBase):
         """
         self.api._make_request(Endpoints.Account.RECOVER, body={
             "email": email
-        })
+        }, auth=False)
 
     def complete_recover(self, code: str, password: str) -> None:
         """
@@ -49,7 +49,7 @@ class AccountAPI(APIBase):
             "newPassword": password
         }, urlparams={
             "code": code
-        })
+        }, auth=False)
 
     def activate(self, code: str) -> None:
         """
