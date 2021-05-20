@@ -20,6 +20,9 @@ class BaseType(BaseModel):
     relationships: Optional[List[Relationship]] = []
     version: Version
 
+    def relations_to(self, type_: str):
+        return [i for i in self.relationships if i.type == type_]
+
 
 Type = KeyedUnion[BaseType]
 
@@ -65,6 +68,14 @@ class Manga(BaseType):
     def tag_names(self):
         return [i.name for i in self.tags]
 
+    @property
+    def authors(self):
+        return self.relations_to("author")
+
+    @property
+    def artists(self):
+        return self.relations_to("artist")
+
 
 class Chapter(BaseType):
     _type = "chapter"
@@ -82,6 +93,22 @@ class Chapter(BaseType):
     createdAt: datetime
     updatedAt: datetime
     publishAt: datetime
+
+    @property
+    def groups(self):
+        return self.relations_to("scanlation_group")
+
+    @property
+    def manga(self):
+        if (manga := self.relations_to("manga")):
+            return manga[0]
+        return None
+
+    @property
+    def uploader(self):
+        if (users := self.relations_to("user")):
+            return users[0]
+        return None
 
 
 class ScanlationGroup(BaseType):
