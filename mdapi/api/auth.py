@@ -44,7 +44,10 @@ class AuthAPI(APIBase):
         Logout the current user. If no user is logged in, this will
         still make a logout request, but it will have no effect.
         """
-        self.api._make_request(Endpoints.Auth.LOGOUT)
+        try:
+            self.api._make_request(Endpoints.Auth.LOGOUT)
+        except MdException:
+            pass
         self.api._authenticate(None, None)
 
     def refresh(self) -> None:

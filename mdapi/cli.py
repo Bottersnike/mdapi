@@ -189,5 +189,22 @@ def read(md: MdAPI, chapter, locales):
     download_chapter(md, chapter, path)
 
 
+@cli.command()
+@uses_md
+@click.argument("email", nargs=1)
+def recover(md: MdAPI, email):
+    md.account.recover(email)
+    click.echo(click.style("Check your inbox for an email!", fg="green"))
+
+
+@cli.command()
+@uses_md
+@click.argument("code", nargs=1)
+def complete_recover(md: MdAPI, code):
+    password = click.prompt("Password", hide_input=True)
+    md.account.complete_recover(code, password)
+    click.echo(click.style("Password reset", fg="green"))
+
+
 def main():
     cli()

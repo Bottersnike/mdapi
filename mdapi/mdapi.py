@@ -116,6 +116,8 @@ class APIHandler:
             raise ActionForbidden(resp)
 
         if req.status_code < 200 or req.status_code > 299:
+            if resp is None:
+                raise MdException(req.status_code)
             raise MdException(resp.get("errors", []))
 
         if not isinstance(resp, dict):
