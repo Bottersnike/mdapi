@@ -4,6 +4,8 @@ import base64
 import json
 import time
 from typing import Generic, Iterable, List, TypeVar
+from queue import Queue, Empty
+from threading import Thread
 
 from pydantic.main import BaseModel
 
@@ -71,6 +73,63 @@ def strip_nulls(object):
         for k, v in (object or {}).items()
         if v is not None
     }
+
+
+class Worker:
+    class Kill:
+        pass
+    KILL = Kill()
+
+    def __init__(self, worker, long_lived=False, num_workers=3):
+        self._worker = worker
+        self._long_lived = long_lived
+        self._num_workers = num_workers
+        self._queue = Queue()
+        self._killed = False
+
+    @property
+    def killed(self):
+        return self._killed
+
+    def _local_worker(self):
+        while True:
+            if self._long_lived:
+                job = self._queue.get()
+            else:
+                try:
+                    job = self._queue.get_nowait()
+                except Empty:
+                    return
+            if job is self.KILL:
+                self._queue.task_done()
+                return
+
+            self._worker(job)
+            self._queue.task_done()
+
+    def start(self):
+        for _ in range(self._num_workers):
+            Thread(target=self._local_worker, daemon=True).start()
+
+    def kill(self):
+        self._killed = True
+        while True:
+            try:
+                self._queue.get_nowait()
+            except Empty:
+                break
+            else:
+                self._queue.task_done()
+        for _ in range(self._num_workers):
+            self._queue.put(self.KILL)
+
+    def enqueue(self, job):
+        if self._killed:
+            return
+        self._queue.put(job)
+
+    def join(self):
+        self._queue.join()
 
 
 T = TypeVar("T")
