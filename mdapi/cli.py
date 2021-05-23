@@ -98,7 +98,7 @@ def search(md: MdAPI, query):
 @click.option("-l", "--locales", default="en")
 def chapters(md: MdAPI, manga, locales):
     results = md.manga.get_chapters(
-        manga, locales=locales.split(","),
+        manga, translatedLanguage=locales.split(","),
         order=ChapterSortOrder(chapter=SortOrder.desc)
     )
     results._ensure_populated()
@@ -140,7 +140,7 @@ def download_chapter(md: MdAPI, chapter, path):
 def read_manga(manga, locales="en"):
     md = MdAPI()
     manga = md.manga.get(manga)
-    results = md.manga.get_chapters(manga.id, locales=locales)
+    results = md.manga.get_chapters(manga.id, translatedLanguage=locales)
     results._ensure_populated()
     if not click.confirm(
         f"This will download {results.total} chapters. Proceed?"

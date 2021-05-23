@@ -177,7 +177,7 @@ class MangaAPI(APIBase):
     def get_chapters(
         self,
         manga: TypeOrId[Manga],
-        locales: List[LanguageCode] = None,
+        translatedLanguage: List[LanguageCode] = None,
         createdAtSince: datetime = None,
         updatedAtSince: datetime = None,
         publishAtSince: datetime = None,
