@@ -33,3 +33,9 @@ class ChapterSortOrder(BaseSortOrder):
     publishAt: Optional[SortOrder]
     volume: Optional[SortOrder]
     chapter: Optional[SortOrder]
+
+
+class CoverSortOrder(BaseSortOrder):
+    createdAt: Optional[SortOrder]
+    updatedAt: Optional[SortOrder]
+    volume: Optional[SortOrder]

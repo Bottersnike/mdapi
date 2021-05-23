@@ -20,6 +20,12 @@ class Endpoints:
         ADD_TO_LIST = ("POST", "/manga/{manga}/list/{list}")
         REMOVE_FROM_LIST = ("DELETE", "/manga/{manga}/list/{list}")
 
+    class Cover:
+        SEARCH = ("GET", "/cover")
+        UPLOAD = ("POST", "/cover/{manga}")
+        EDIT = ("PUT", "/cover/{cover}")
+        DELETE = ("DELETE", "/cover/{cover}")
+
     class Auth:
         LOGIN = ("POST", "/auth/login")
         CHECK = ("GET", "/auth/check")

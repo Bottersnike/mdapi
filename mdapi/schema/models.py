@@ -144,3 +144,13 @@ class Author(BaseType):
     imageUrl: Optional[str]
     createdAt: datetime
     updatedAt: datetime
+
+
+class Cover(BaseType):
+    _type = "cover_art"
+
+    volume: str
+    fileName: str
+    description: str
+    createdAt: datetime
+    updatedAt: datetime

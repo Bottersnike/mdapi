@@ -10,7 +10,7 @@ from .exceptions import (
 )
 from .api import (
     AccountAPI, AuthAPI, AuthorAPI, ChapterAPI, GroupAPI, ListAPI, MangaAPI,
-    MiscAPI, UserAPI
+    MiscAPI, UserAPI, CoverAPI
 )
 from .util import _is_token_expired, params_to_query, strip_nulls
 from .endpoints import Endpoints
@@ -81,7 +81,10 @@ class APIHandler:
         headers["User-Agent"] = self.UA
         return headers
 
-    def _make_request(self, action, body=None, params=None, urlparams=None, auth=True):
+    def _make_request(
+        self, action, body=None, params=None, urlparams=None, auth=True,
+        files=None
+    ):
         if params is not None:
             params = params_to_query(params)
         if action != Endpoints.Auth.REFRESH:
@@ -95,6 +98,7 @@ class APIHandler:
         req = requests.request(
             action[0], url,
             json=None if action[0] == "GET" else strip_nulls(body),
+            files=files,
             params=strip_nulls(params),
             headers=self._get_headers(auth)
         )
@@ -146,6 +150,7 @@ class MdAPI:
         self.auth = AuthAPI(self, self.api)
         self.author = AuthorAPI(self, self.api)
         self.chapter = ChapterAPI(self, self.api)
+        self.cover = CoverAPI(self, self.api)
         self.group = GroupAPI(self, self.api)
         self.list = ListAPI(self, self.api)
         self.manga = MangaAPI(self, self.api)

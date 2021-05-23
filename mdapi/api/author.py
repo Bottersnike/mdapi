@@ -69,7 +69,7 @@ class AuthorAPI(APIBase):
 
     @validate_arguments
     def edit(
-        self, author: TypeOrId[Author], name: CanUnset[str] = None
+        self, author: Author, name: CanUnset[str] = None
     ) -> None:
         """
         Make edits to a user. Currently only changing the author name is
