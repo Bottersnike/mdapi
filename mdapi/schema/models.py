@@ -21,6 +21,8 @@ class BaseType(BaseModel):
     version: Version
 
     def relations_to(self, type_: str):
+        if self.relationships is None:
+            return []
         return [i for i in self.relationships if i.type == type_]
 
 
