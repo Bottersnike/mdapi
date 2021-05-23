@@ -115,6 +115,10 @@ class PaginatedRequest(Generic[T]):
                 raise StopIteration
             self._get_next()
 
+    def __len__(self) -> int:
+        self._ensure_populated()
+        return self.total
+
     def __next__(self) -> T:
         self._ensure_populated()
 
@@ -122,6 +126,8 @@ class PaginatedRequest(Generic[T]):
             raise StopIteration
 
         result = self._results.pop(0)
+        if "relationships" in result:
+            result["data"]["relationships"] = result["relationships"]
         result = result.get("data", result)
         return Type.parse_obj(result)
 

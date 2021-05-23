@@ -1,3 +1,4 @@
+from mdapi.endpoints import Endpoints
 from typing import Dict, List, Optional
 from datetime import datetime
 from pydantic import BaseModel, constr
@@ -151,8 +152,24 @@ class Author(BaseType):
 class Cover(BaseType):
     _type = "cover_art"
 
-    volume: str
+    volume: Optional[str]
     fileName: str
     description: str
     createdAt: datetime
     updatedAt: datetime
+
+    @property
+    def manga(self):
+        return self.relations_to("manga")[0]
+
+    @property
+    def url(self):
+        return Endpoints.COVERS.format(self.manga.id, self.fileName)
+
+    @property
+    def url_512(self):
+        return self.url + ".512.jpg"
+
+    @property
+    def url_256(self):
+        return self.url + ".256.jpg"

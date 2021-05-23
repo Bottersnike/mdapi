@@ -206,5 +206,18 @@ def complete_recover(md: MdAPI, code):
     click.echo(click.style("Password reset", fg="green"))
 
 
+@cli.command()
+@uses_md
+def follows(md: MdAPI):
+    try:
+        for follow in md.user.get_followed_manga():
+            click.echo(click.style(follow.id, fg="magenta"), nl=False)
+            click.echo(" ", nl=False)
+            click.echo(click.style(str(follow.title), fg="bright_blue"))
+    except NotLoggedIn:
+        click.echo(click.style("Not logged in", fg="red"))
+        return
+
+
 def main():
     cli()

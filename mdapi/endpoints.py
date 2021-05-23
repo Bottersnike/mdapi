@@ -1,4 +1,6 @@
 class Endpoints:
+    COVERS = "https://uploads.mangadex.org/covers/{}/{}"
+
     class Manga:
         SEARCH = ("GET", "/manga")
         CREATE = ("POST", "/manga")
