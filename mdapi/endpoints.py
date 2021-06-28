@@ -80,6 +80,14 @@ class Endpoints:
         EDIT = ("PUT", "/author/{author}")
         DELETE = ("DELETE", "/author/{author}")
 
+    class Upload:
+        GET_SESSION = ("GET", "/upload")
+        BEGIN = ("GET", "/upload/begin")
+        ADD_IMAGE = ("POST", "/upload/{session}")
+        DELETE_IMAGE = ("DELETE", "/upload/{session}/{file}")
+        ABADON = ("DELETE", "/upload/{session}")
+        COMMIT = ("POST", "/upload/{session}/commit")
+
     GET_MD_AT_HOME = ("GET", "/at-home/server/{chapter}")
     SOLVE_CAPTCHA = ("POST", "/captcha/solve")
     LEGACY_MAPPING = ("POST", "/legacy/mapping")

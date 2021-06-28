@@ -1,6 +1,6 @@
 from .models import (
     Type, User, Tag, Manga, Chapter, ScanlationGroup, CustomList,
-    MappingID, Author, Cover
+    MappingID, Author, Cover, UploadSession, UploadSessionFile
 )
 from .const import (
     PublicationDemographic, Status, ContentRating, ReadingStatus,
@@ -16,7 +16,8 @@ from .util import (
 
 __all__ = (
     "TypeOrId", "Type", "User", "Tag", "Manga", "Chapter", "ScanlationGroup",
-    "CustomList", "MappingID", "Author", "Cover",
+    "CustomList", "MappingID", "Author", "Cover", "UploadSession",
+    "UploadSessionFile",
 
     "PublicationDemographic", "Status", "ContentRating", "ReadingStatus",
     "CustomListVisibility", "LinksKey", "LanguageCode", "SortOrder", "Version",

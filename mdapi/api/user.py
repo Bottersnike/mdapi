@@ -1,7 +1,7 @@
 from pydantic.decorator import validate_arguments
 
 from ..endpoints import Endpoints
-from ..util import PaginatedRequest, _type_id
+from ..util import PaginatedRequest
 from ..schema import TypeOrId, User, Type
 from .base import APIBase
 
@@ -21,7 +21,7 @@ class UserAPI(APIBase):
             self.api,
             Endpoints.User.OTHER_LIST,
             urlparams={
-                "user": _type_id(user)
+                "user": user
             },
             limit=limit, offset=offset
         )

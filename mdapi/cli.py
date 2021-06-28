@@ -137,7 +137,7 @@ def download_chapter(md: MdAPI, chapter, path):
                 bar.update(0)
 
 
-def read_manga(manga, locales="en"):
+def read_manga(manga, locales=("en", )):
     md = MdAPI()
     manga = md.manga.get(manga)
     results = md.manga.get_chapters(manga.id, translatedLanguage=locales)
@@ -165,9 +165,13 @@ def read_manga(manga, locales="en"):
 @click.argument("chapter", nargs=1)
 @click.option("-l", "--locales", default="en")
 def read(md: MdAPI, chapter, locales):
-    chapter_ = md.chapter.get(chapter)
+    try:
+        chapter_ = md.chapter.get(chapter)
+    except MdException:
+        chapter_ = None
+
     if chapter_ is None:
-        return read_manga(chapter, locales)
+        return read_manga(chapter, locales.split(","))
     chapter = chapter_
 
     manga = None

@@ -24,8 +24,8 @@ class AccountAPI(APIBase):
                 "username": username,
                 "password": password,
                 "email": email
-            }
-        ), auth=False)
+            }, auth=False
+        ))
 
     def recover(self, email: str) -> None:
         """

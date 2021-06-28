@@ -220,7 +220,7 @@ class ChapterAPI(APIBase):
                     url, False, False, 0, req.elapsed.microseconds // 1000
                 )
 
-            raise InvalidStatusCode(req.status_code)
+            raise InvalidStatusCode(req.status_code, req.content)
 
         is_cached = req.headers.get("X-Cache", "").startswith("HIT")
         total_length = int(req.headers.get("Content-Length"))

@@ -8,9 +8,10 @@ from .list import ListAPI
 from .manga import MangaAPI
 from .misc import MiscAPI
 from .user import UserAPI
+from .upload import UploadAPI
 
 
 __all__ = (
     "AccountAPI", "AuthAPI", "AuthorAPI", "ChapterAPI", "GroupAPI", "ListAPI",
-    "MangaAPI", "MiscAPI", "UserAPI", "CoverAPI"
+    "MangaAPI", "MiscAPI", "UserAPI", "CoverAPI", "UploadAPI"
 )

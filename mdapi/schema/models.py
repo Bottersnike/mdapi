@@ -42,7 +42,7 @@ class Tag(BaseType):
 
     name: LocalizedString
     description: List[LocalizedString]
-    group: Optional[UUID]
+    group: Optional[str]
 
 
 class Manga(BaseType):
@@ -173,3 +173,20 @@ class Cover(BaseType):
     @property
     def url_256(self):
         return self.url + ".256.jpg"
+
+
+class UploadSession(BaseType):
+    _type = "upload_session"
+
+    isCommitted: bool
+    isProcessed: bool
+    isDeleted: bool
+
+
+class UploadSessionFile(BaseType):
+    _type = "upload_session_file"
+
+    originalFileName: str
+    fileHash: str
+    fileSize: int
+    mimeType: str

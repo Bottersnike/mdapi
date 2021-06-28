@@ -104,8 +104,10 @@ class Worker:
                 self._queue.task_done()
                 return
 
-            self._worker(job)
-            self._queue.task_done()
+            try:
+                self._worker(job)
+            finally:
+                self._queue.task_done()
 
     def start(self):
         for _ in range(self._num_workers):

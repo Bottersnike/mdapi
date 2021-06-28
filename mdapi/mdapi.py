@@ -10,7 +10,7 @@ from .exceptions import (
 )
 from .api import (
     AccountAPI, AuthAPI, AuthorAPI, ChapterAPI, GroupAPI, ListAPI, MangaAPI,
-    MiscAPI, UserAPI, CoverAPI
+    MiscAPI, UserAPI, CoverAPI, UploadAPI
 )
 from .util import _is_token_expired, params_to_query, strip_nulls
 from .endpoints import Endpoints
@@ -105,6 +105,12 @@ class APIHandler:
         if self.DEBUG:
             click.echo(click.style(f" -> {action[0]} {req.url}", fg="yellow"))
 
+            correlation = req.headers.get("X-Correlation-ID")
+            if correlation:
+                click.echo(click.style(
+                    f" :: Correlation: {correlation}", fg="yellow"
+                ))
+
         try:
             resp = {} if req.status_code == 204 else req.json()
         except json.decoder.JSONDecodeError:
@@ -158,5 +164,6 @@ class MdAPI:
         self.manga = MangaAPI(self, self.api)
         self.misc = MiscAPI(self, self.api)
         self.user = UserAPI(self, self.api)
+        self.upload = UploadAPI(self, self.api)
 
         self.api._load_auth()
